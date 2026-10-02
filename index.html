@@ -452,6 +452,34 @@ function generateExcel() {
   const worksheet =
     XLSX.utils.json_to_sheet(rows);
 
+worksheet["!cols"] = [
+  { wch: 24 },
+  { wch: 18 },
+  { wch: 14 },
+  { wch: 15 },
+  { wch: 16 },
+  { wch: 12 },
+  { wch: 18 },
+  { wch: 15 },
+  { wch: 14 }
+];
+
+const headerRange = XLSX.utils.decode_range(worksheet["!ref"]);
+
+for (let C = headerRange.s.c; C <= headerRange.e.c; C++) {
+  const cell = worksheet[XLSX.utils.encode_cell({ r: 0, c: C })];
+
+  if (cell) {
+    cell.s = {
+      font: {
+        bold: true
+      },
+      alignment: {
+        horizontal: "center"
+      }
+    };
+  }
+}
 
   const workbook =
     XLSX.utils.book_new();
