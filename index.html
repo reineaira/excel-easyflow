@@ -166,7 +166,35 @@ footer {
   </p>
 </header>
 
-<div class="container">
+<div class="card">
+  <h2>💜 Choose Your Excel Solution</h2>
+
+  <p>
+    Start with our free Excel generator, or request a customized
+    spreadsheet designed for your business.
+  </p>
+
+  <h3>🆓 FREE</h3>
+  <ul>
+    <li>Inventory & Sales tracker</li>
+    <li>Automatic sales calculation</li>
+    <li>Automatic profit calculation</li>
+    <li>Downloadable Excel file</li>
+  </ul>
+
+  <h3>⭐ CUSTOM EXCEL</h3>
+  <ul>
+    <li>Customized for your business</li>
+    <li>Expenses & profit tracking</li>
+    <li>Customer records</li>
+    <li>Reports and dashboard</li>
+    <li>Additional features upon request</li>
+  </ul>
+
+  <button class="primary" onclick="contactForCustom()">
+    💬 Request Custom Excel
+  </button>
+</div>
 
   <div class="card">
 
@@ -572,7 +600,10 @@ function downloadExcel() {
 
 
 addProduct();
-
+function contactForCustom() {
+  window.location.href =
+    "mailto:bautistareineaira34@gmail.com?subject=Custom%20Excel%20Request";
+}
 </script>
 
 </body>
