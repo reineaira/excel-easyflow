@@ -157,6 +157,7 @@ footer {
 </head>
 
 <body>
+
 <div class="card">
   <h2>✨ What do you want to create?</h2>
 
@@ -170,9 +171,11 @@ footer {
     <option value="attendance">👩‍💼 Employee Attendance</option>
     <option value="reports">📊 Reports</option>
   </select>
+
   <div id="toolMessage"></div>
   <div id="inventoryForm"></div>
 </div>
+
 <header>
   <h1>📊 Excel EasyFlow</h1>
   <p>
@@ -211,94 +214,86 @@ footer {
   </button>
 </div>
 
-  <div class="card">
+<div class="card">
 
-    <h2>1. Tell us about your business</h2>
+  <h2>1. Tell us about your business</h2>
 
-    <label>Business Name</label>
-    <input
-      type="text"
-      id="businessName"
-      placeholder="Example: Sweet Corner"
-    >
+  <label>Business Name</label>
+  <input
+    type="text"
+    id="businessName"
+    placeholder="Example: Sweet Corner"
+  >
 
-    <label>Business Type</label>
+  <label>Business Type</label>
 
-    <select id="businessType">
-      <option value="Online Shop">Online Shop</option>
-      <option value="Food Business">Food Business</option>
-      <option value="Retail Store">Retail Store</option>
-      <option value="Sari-Sari Store">Sari-Sari Store</option>
-      <option value="Other">Other</option>
-    </select>
-
-  </div>
-
-
-  <div class="card">
-
-    <h2>2. Add your products</h2>
-
-    <p>
-      Enter your products below. The tool will automatically
-      calculate remaining stock, sales, and profit.
-    </p>
-
-    <div id="products"></div>
-
-    <button class="add" onclick="addProduct()">
-      ➕ Add Another Product
-    </button>
-
-  </div>
-
-
-  <div class="card">
-
-    <h2>3. Create your Excel file</h2>
-
-    <p>
-      Click the button below and Excel EasyFlow will create
-      a ready-to-use spreadsheet.
-    </p>
-
-    <button class="primary" onclick="generateExcel()">
-      ✨ Generate My Excel
-    </button>
-
-  </div>
-
-
-  <div class="card" id="result">
-
-    <div class="success">
-      <strong>🎉 Your spreadsheet is ready!</strong>
-
-      <p>
-        Your inventory and sales spreadsheet has been created.
-      </p>
-    </div>
-
-    <button class="download" onclick="downloadExcel()">
-      📥 Download Excel File
-    </button>
-
-  </div>
+  <select id="businessType">
+    <option value="Online Shop">Online Shop</option>
+    <option value="Food Business">Food Business</option>
+    <option value="Retail Store">Retail Store</option>
+    <option value="Sari-Sari Store">Sari-Sari Store</option>
+    <option value="Other">Other</option>
+  </select>
 
 </div>
 
+<div class="card">
+
+  <h2>2. Add your products</h2>
+
+  <p>
+    Enter your products below. The tool will automatically
+    calculate remaining stock, sales, and profit.
+  </p>
+
+  <div id="products"></div>
+
+  <button class="add" onclick="addProduct()">
+    ➕ Add Another Product
+  </button>
+
+</div>
+
+<div class="card">
+
+  <h2>3. Create your Excel file</h2>
+
+  <p>
+    Click the button below and Excel EasyFlow will create
+    a ready-to-use spreadsheet.
+  </p>
+
+  <button class="primary" onclick="generateExcel()">
+    ✨ Generate My Excel
+  </button>
+
+</div>
+
+<div class="card" id="result">
+
+  <div class="success">
+    <strong>🎉 Your spreadsheet is ready!</strong>
+
+    <p>
+      Your inventory and sales spreadsheet has been created.
+    </p>
+  </div>
+
+  <button class="download" onclick="downloadExcel()">
+    📥 Download Excel File
+  </button>
+
+</div>
 
 <footer>
   <p>Excel EasyFlow © 2026</p>
   <p>Simple tools for smarter work.</p>
 </footer>
 
-
 <script>
 
 let productCount = 0;
 let generatedWorkbook = null;
-
 
 function addProduct() {
 
@@ -324,7 +319,6 @@ function addProduct() {
       placeholder="Example: Chocolate Cookies"
     >
 
-
     <label>Category</label>
 
     <input
@@ -332,7 +326,6 @@ function addProduct() {
       class="product-category"
       placeholder="Example: Desserts"
     >
-
 
     <label>Cost Price</label>
 
@@ -343,7 +336,6 @@ function addProduct() {
       min="0"
     >
 
-
     <label>Selling Price</label>
 
     <input
@@ -352,7 +344,6 @@ function addProduct() {
       placeholder="0"
       min="0"
     >
-
 
     <label>Starting Stock</label>
 
@@ -363,7 +354,6 @@ function addProduct() {
       min="0"
     >
 
-
     <label>Units Sold</label>
 
     <input
@@ -373,7 +363,6 @@ function addProduct() {
       min="0"
       value="0"
     >
-
 
     <button
       class="remove"
@@ -387,7 +376,6 @@ function addProduct() {
   container.appendChild(div);
 }
 
-
 function removeProduct(id) {
 
   const product = document.getElementById("product-" + id);
@@ -396,7 +384,6 @@ function removeProduct(id) {
     product.remove();
   }
 }
-
 
 function generateExcel() {
 
@@ -410,13 +397,10 @@ function generateExcel() {
     return;
   }
 
-
   const rows = [];
-
 
   const products =
     document.querySelectorAll(".product-row");
-
 
   if (products.length === 0) {
 
@@ -424,7 +408,6 @@ function generateExcel() {
 
     return;
   }
-
 
   products.forEach((product) => {
 
@@ -446,18 +429,15 @@ function generateExcel() {
     const sold =
       Number(product.querySelector(".units-sold").value) || 0;
 
-
     if (!name) {
       return;
     }
-
 
     const remaining = stock - sold;
 
     const sales = selling * sold;
 
     const profit = (selling - cost) * sold;
-
 
     rows.push({
 
@@ -483,7 +463,6 @@ function generateExcel() {
 
   });
 
-
   if (rows.length === 0) {
 
     alert("Please enter at least one product name.");
@@ -491,49 +470,54 @@ function generateExcel() {
     return;
   }
 
-
   const worksheet =
     XLSX.utils.json_to_sheet(rows);
 
-worksheet["!cols"] = [
-  { wch: 24 },
-  { wch: 18 },
-  { wch: 14 },
-  { wch: 15 },
-  { wch: 16 },
-  { wch: 12 },
-  { wch: 18 },
-  { wch: 15 },
-  { wch: 14 }
-];
+  worksheet["!cols"] = [
+    { wch: 24 },
+    { wch: 18 },
+    { wch: 14 },
+    { wch: 15 },
+    { wch: 16 },
+    { wch: 12 },
+    { wch: 18 },
+    { wch: 15 },
+    { wch: 14 }
+  ];
 
-const headerRange = XLSX.utils.decode_range(worksheet["!ref"]);
+  const headerRange = XLSX.utils.decode_range(worksheet["!ref"]);
 
-for (let C = headerRange.s.c; C <= headerRange.e.c; C++) {
-  const cell = worksheet[XLSX.utils.encode_cell({ r: 0, c: C })];
+  for (let C = headerRange.s.c; C <= headerRange.e.c; C++) {
 
-  if (cell) {
-    cell.s = {
-      font: {
-        bold: true
-      },
-      alignment: {
-        horizontal: "center"
-      }
-    };
+    const cell =
+      worksheet[XLSX.utils.encode_cell({ r: 0, c: C })];
+
+    if (cell) {
+
+      cell.s = {
+
+        font: {
+          bold: true
+        },
+
+        alignment: {
+          horizontal: "center"
+        }
+
+      };
+
+    }
+
   }
-}
 
   const workbook =
     XLSX.utils.book_new();
-
 
   XLSX.utils.book_append_sheet(
     workbook,
     worksheet,
     "Inventory & Sales"
   );
-
 
   const summaryData = [
 
@@ -555,10 +539,8 @@ for (let C = headerRange.s.c; C <= headerRange.e.c; C++) {
 
   ];
 
-
   const summarySheet =
     XLSX.utils.aoa_to_sheet(summaryData);
-
 
   XLSX.utils.book_append_sheet(
     workbook,
@@ -566,12 +548,9 @@ for (let C = headerRange.s.c; C <= headerRange.e.c; C++) {
     "Summary"
   );
 
-
   generatedWorkbook = workbook;
 
-
   document.getElementById("result").style.display = "block";
-
 
   document.getElementById("result")
     .scrollIntoView({
@@ -579,7 +558,6 @@ for (let C = headerRange.s.c; C <= headerRange.e.c; C++) {
     });
 
 }
-
 
 function downloadExcel() {
 
@@ -590,21 +568,17 @@ function downloadExcel() {
     return;
   }
 
-
   const businessName =
     document.getElementById("businessName").value.trim();
 
-
   let filename =
     businessName.replace(/[^a-z0-9]/gi, "_");
-
 
   if (!filename) {
 
     filename = "Excel_EasyFlow";
 
   }
-
 
   XLSX.writeFile(
     generatedWorkbook,
@@ -613,21 +587,40 @@ function downloadExcel() {
 
 }
 
-
 addProduct();
+
 document.getElementById("toolChoice").addEventListener("change", function () {
+
   const message = document.getElementById("toolMessage");
 
   if (this.value === "inventory") {
-    message.innerHTML = "📦 Inventory selected. Let's build your inventory!";
+
+    message.innerHTML =
+      "📦 Inventory selected. Let's build your inventory!";
+
+    document.getElementById("inventoryForm").innerHTML = `
+      <h3>📦 Inventory Setup</h3>
+      <p>Let's start with your inventory.</p>
+    `;
+
   } else {
-    message.innerHTML = "✨ EasyFlow is preparing this workflow.";
+
+    message.innerHTML =
+      "✨ EasyFlow is preparing this workflow.";
+
+    document.getElementById("inventoryForm").innerHTML = "";
+
   }
+
 });
- function contactForCustom() {
+
+function contactForCustom() {
+
   window.location.href =
     "mailto:bautistareineaira34@gmail.com?subject=Custom%20Excel%20Request";
+
 }
+
 </script>
 
 </body>
