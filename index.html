@@ -614,7 +614,16 @@ function downloadExcel() {
 
 
 addProduct();
-function contactForCustom() {
+document.getElementById("toolChoice").addEventListener("change", function () {
+  const message = document.getElementById("toolMessage");
+
+  if (this.value === "inventory") {
+    message.innerHTML = "📦 Inventory selected. Let's build your inventory!";
+  } else {
+    message.innerHTML = "✨ EasyFlow is preparing this workflow.";
+  }
+});
+ function contactForCustom() {
   window.location.href =
     "mailto:bautistareineaira34@gmail.com?subject=Custom%20Excel%20Request";
 }
