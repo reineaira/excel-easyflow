@@ -35,7 +35,7 @@ header h1 {
 header p {
   font-size: 18px;
   margin: 12px auto 0;
-  max-width: 650px;
+  max-width: 700px;
 }
 
 .container {
@@ -119,8 +119,724 @@ button {
   margin-top: 20px;
 }
 
-.tool-card {
-  margin-top: 25px;
+.product-card {
+  border: 1px solid #e2def7;
+  padding: 20px;
+  border-radius: 14px;
+  margin-top: 18px;
+  background: #faf9ff;
 }
 
-.tool
+.tracking-box {
+  margin-top: 25px;
+  padding: 18px;
+  border-radius: 12px;
+  background: #f5f3ff;
+}
+
+.tracking-box label {
+  font-weight: normal;
+  margin-top: 10px;
+}
+
+.tracking-box input {
+  width: auto;
+  margin-right: 8px;
+}
+
+.message {
+  margin-top: 18px;
+  padding: 15px;
+  border-radius: 10px;
+  background: #eeeaff;
+  color: #4b3da3;
+  font-weight: bold;
+}
+
+.success {
+  background: #e8f8ed;
+  color: #217a3c;
+}
+
+.info {
+  background: #eef5ff;
+  color: #315d9b;
+}
+
+.hidden {
+  display: none;
+}
+
+footer {
+  text-align: center;
+  padding: 30px 15px;
+  color: #777;
+}
+
+ul {
+  line-height: 1.8;
+}
+
+.small-note {
+  font-size: 14px;
+  color: #777;
+  margin-top: 8px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="card">
+    <h2>✨ What do you want to create?</h2>
+
+    <p>
+      Choose the type of Excel tool you need.
+      EasyFlow will guide you through the information needed.
+    </p>
+
+    <select id="toolChoice">
+      <option value="inventory">📦 Inventory</option>
+      <option value="sales">💰 Sales Tracker</option>
+      <option value="expenses">🧾 Expenses</option>
+      <option value="customers">👥 Customer List</option>
+      <option value="attendance">👩‍💼 Employee Attendance</option>
+      <option value="reports">📊 Reports</option>
+    </select>
+
+    <div id="toolMessage"></div>
+  </div>
+
+</div>
+
+<header>
+  <h1>📊 Excel EasyFlow</h1>
+
+  <p>
+    Tell us what you need. We build the spreadsheet for you.
+  </p>
+</header>
+
+<div class="container">
+
+  <div id="inventoryForm"></div>
+
+  <div class="card">
+    <h2>💜 Choose Your Excel Solution</h2>
+
+    <p>
+      Start with our free Excel generator, or request a customized
+      spreadsheet designed for your business.
+    </p>
+
+    <h3>🆓 FREE</h3>
+
+    <ul>
+      <li>Inventory & Sales tracker</li>
+      <li>Automatic stock calculation</li>
+      <li>Automatic sales calculation</li>
+      <li>Automatic profit calculation</li>
+      <li>Low-stock status</li>
+      <li>Downloadable Excel file</li>
+    </ul>
+
+    <h3>⭐ CUSTOM EXCEL</h3>
+
+    <ul>
+      <li>Customized for your business</li>
+      <li>Expenses & profit tracking</li>
+      <li>Customer records</li>
+      <li>Employee attendance</li>
+      <li>Reports and dashboard</li>
+      <li>Additional features upon request</li>
+    </ul>
+
+    <button class="primary" onclick="contactForCustom()">
+      💬 Request Custom Excel
+    </button>
+  </div>
+
+  <div id="resultArea"></div>
+
+</div>
+
+<footer>
+  © 2026 Excel EasyFlow — Simple tools for easier work.
+</footer>
+
+<script>
+
+let products = [];
+let productCounter = 0;
+
+const toolChoice = document.getElementById("toolChoice");
+const toolMessage = document.getElementById("toolMessage");
+const inventoryForm = document.getElementById("inventoryForm");
+const resultArea = document.getElementById("resultArea");
+
+toolChoice.addEventListener("change", function () {
+
+  if (this.value === "inventory") {
+    showInventory();
+  } else {
+    inventoryForm.innerHTML = "";
+
+    toolMessage.className = "message info";
+
+    toolMessage.innerHTML =
+      "✨ EasyFlow is preparing this workflow.";
+  }
+
+});
+
+function showInventory() {
+
+  toolMessage.className = "message";
+
+  toolMessage.innerHTML =
+    "📦 Inventory selected. Let's build your inventory!";
+
+  inventoryForm.innerHTML = `
+
+    <div class="card">
+
+      <h2>📦 Inventory Setup</h2>
+
+      <p>
+        Tell EasyFlow a few details about your business.
+      </p>
+
+      <label>Business Name</label>
+      <input
+        type="text"
+        id="businessName"
+        placeholder="Example: Reine's Mini Store"
+      >
+
+      <label>Business Type</label>
+      <input
+        type="text"
+        id="businessType"
+        placeholder="Example: Retail Store"
+      >
+
+      <label>Low Stock Alert Level</label>
+      <input
+        type="number"
+        id="lowStockLevel"
+        value="5"
+        min="0"
+      >
+
+      <p class="small-note">
+        Products with stock at or below this number will be marked
+        as Low Stock.
+      </p>
+
+    </div>
+
+    <div class="card">
+
+      <h2>🛒 Add Your Products</h2>
+
+      <div id="productsContainer"></div>
+
+      <button class="add" onclick="addProduct()">
+        ➕ Add Another Product
+      </button>
+
+      <div class="tracking-box">
+
+        <h3>📊 What do you want to track?</h3>
+
+        <label>
+          <input type="checkbox" id="trackStock" checked>
+          Stock
+        </label>
+
+        <label>
+          <input type="checkbox" id="trackSales" checked>
+          Sales
+        </label>
+
+        <label>
+          <input type="checkbox" id="trackProfit" checked>
+          Profit
+        </label>
+
+        <label>
+          <input type="checkbox" id="trackLowStock" checked>
+          Low Stock Alerts
+        </label>
+
+      </div>
+
+      <button class="primary" onclick="generateExcel()">
+        🚀 Generate My Excel
+      </button>
+
+    </div>
+  `;
+
+  products = [];
+  productCounter = 0;
+
+  addProduct();
+}
+
+function addProduct() {
+
+  productCounter++;
+
+  const id = productCounter;
+
+  products.push(id);
+
+  const container = document.getElementById("productsContainer");
+
+  if (!container) return;
+
+  const productCard = document.createElement("div");
+
+  productCard.className = "product-card";
+
+  productCard.id = "product-" + id;
+
+  productCard.innerHTML = `
+
+    <h3>Product ${id}</h3>
+
+    <label>Product Name</label>
+
+    <input
+      type="text"
+      id="productName-${id}"
+      placeholder="Example: Rice"
+    >
+
+    <label>Category</label>
+
+    <input
+      type="text"
+      id="category-${id}"
+      placeholder="Example: Grocery"
+    >
+
+    <label>Cost Price</label>
+
+    <input
+      type="number"
+      id="costPrice-${id}"
+      placeholder="0.00"
+      min="0"
+    >
+
+    <label>Selling Price</label>
+
+    <input
+      type="number"
+      id="sellingPrice-${id}"
+      placeholder="0.00"
+      min="0"
+    >
+
+    <label>Starting Stock</label>
+
+    <input
+      type="number"
+      id="startingStock-${id}"
+      placeholder="0"
+      min="0"
+    >
+
+    <label>Units Sold</label>
+
+    <input
+      type="number"
+      id="unitsSold-${id}"
+      placeholder="0"
+      min="0"
+    >
+
+    ${
+      products.length > 1
+      ?
+      `<button class="remove" onclick="removeProduct(${id})">
+        🗑️ Remove Product
+      </button>`
+      :
+      ""
+    }
+
+  `;
+
+  container.appendChild(productCard);
+}
+
+function removeProduct(id) {
+
+  const product = document.getElementById("product-" + id);
+
+  if (product) {
+    product.remove();
+  }
+
+  products = products.filter(function(productId) {
+    return productId !== id;
+  });
+}
+
+function generateExcel() {
+
+  if (typeof XLSX === "undefined") {
+
+    alert("Excel library is still loading. Please try again.");
+
+    return;
+  }
+
+  const businessName =
+    document.getElementById("businessName").value.trim();
+
+  const businessType =
+    document.getElementById("businessType").value.trim();
+
+  const lowStockLevel =
+    Number(document.getElementById("lowStockLevel").value) || 0;
+
+  if (!businessName) {
+
+    alert("Please enter your Business Name.");
+
+    return;
+  }
+
+  if (products.length === 0) {
+
+    alert("Please add at least one product.");
+
+    return;
+  }
+
+  const trackStock =
+    document.getElementById("trackStock").checked;
+
+  const trackSales =
+    document.getElementById("trackSales").checked;
+
+  const trackProfit =
+    document.getElementById("trackProfit").checked;
+
+  const trackLowStock =
+    document.getElementById("trackLowStock").checked;
+
+  const rows = [];
+
+  let totalSales = 0;
+
+  let totalProfit = 0;
+
+  let totalUnitsSold = 0;
+
+  let lowStockCount = 0;
+
+  products.forEach(function(id) {
+
+    const name =
+      document.getElementById("productName-" + id).value.trim();
+
+    const category =
+      document.getElementById("category-" + id).value.trim();
+
+    const cost =
+      Number(document.getElementById("costPrice-" + id).value) || 0;
+
+    const selling =
+      Number(document.getElementById("sellingPrice-" + id).value) || 0;
+
+    const startingStock =
+      Number(document.getElementById("startingStock-" + id).value) || 0;
+
+    const unitsSold =
+      Number(document.getElementById("unitsSold-" + id).value) || 0;
+
+    if (!name) return;
+
+    const remainingStock =
+      Math.max(startingStock - unitsSold, 0);
+
+    const sales =
+      selling * unitsSold;
+
+    const profit =
+      (selling - cost) * unitsSold;
+
+    let stockStatus = "🟢 In Stock";
+
+    if (remainingStock === 0) {
+
+      stockStatus = "🔴 Out of Stock";
+
+    } else if (remainingStock <= lowStockLevel) {
+
+      stockStatus = "🟡 Low Stock";
+
+      lowStockCount++;
+    }
+
+    totalSales += sales;
+
+    totalProfit += profit;
+
+    totalUnitsSold += unitsSold;
+
+    const row = {
+      "Product": name,
+      "Category": category,
+      "Cost Price": cost,
+      "Selling Price": selling,
+      "Starting Stock": startingStock,
+      "Units Sold": unitsSold,
+      "Remaining Stock": remainingStock,
+      "Total Sales": sales,
+      "Profit": profit,
+      "Stock Status": stockStatus
+    };
+
+    rows.push(row);
+
+  });
+
+  if (rows.length === 0) {
+
+    alert("Please enter at least one product.");
+
+    return;
+  }
+
+  const worksheet =
+    XLSX.utils.json_to_sheet(rows);
+
+  worksheet["!cols"] = [
+    { wch: 24 },
+    { wch: 18 },
+    { wch: 14 },
+    { wch: 15 },
+    { wch: 16 },
+    { wch: 12 },
+    { wch: 18 },
+    { wch: 15 },
+    { wch: 14 },
+    { wch: 20 }
+  ];
+
+  const headerRange =
+    XLSX.utils.decode_range(worksheet["!ref"]);
+
+  for (
+    let C = headerRange.s.c;
+    C <= headerRange.e.c;
+    C++
+  ) {
+
+    const cell =
+      worksheet[
+        XLSX.utils.encode_cell({
+          r: 0,
+          c: C
+        })
+      ];
+
+    if (cell) {
+
+      cell.s = {
+        font: {
+          bold: true
+        },
+
+        alignment: {
+          horizontal: "center"
+        }
+      };
+
+    }
+  }
+
+  const summaryData = [
+
+    {
+      "Item": "Business Name",
+      "Value": businessName
+    },
+
+    {
+      "Item": "Business Type",
+      "Value": businessType
+    },
+
+    {
+      "Item": "Report Type",
+      "Value": "Inventory & Sales"
+    },
+
+    {
+      "Item": "Number of Products",
+      "Value": rows.length
+    },
+
+    {
+      "Item": "Total Units Sold",
+      "Value": totalUnitsSold
+    },
+
+    {
+      "Item": "Total Sales",
+      "Value": totalSales
+    },
+
+    {
+      "Item": "Total Profit",
+      "Value": totalProfit
+    },
+
+    {
+      "Item": "Low Stock / Out of Stock",
+      "Value": lowStockCount
+    },
+
+    {
+      "Item": "Low Stock Alert Level",
+      "Value": lowStockLevel
+    },
+
+    {
+      "Item": "Track Stock",
+      "Value": trackStock ? "Yes" : "No"
+    },
+
+    {
+      "Item": "Track Sales",
+      "Value": trackSales ? "Yes" : "No"
+    },
+
+    {
+      "Item": "Track Profit",
+      "Value": trackProfit ? "Yes" : "No"
+    },
+
+    {
+      "Item": "Track Low Stock Alerts",
+      "Value": trackLowStock ? "Yes" : "No"
+    }
+
+  ];
+
+  const summarySheet =
+    XLSX.utils.json_to_sheet(summaryData);
+
+  summarySheet["!cols"] = [
+    { wch: 30 },
+    { wch: 35 }
+  ];
+
+  const workbook =
+    XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    worksheet,
+    "Inventory & Sales"
+  );
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    summarySheet,
+    "Summary"
+  );
+
+  const safeName =
+    businessName
+      .replace(/[^a-z0-9]/gi, "_")
+      .substring(0, 40);
+
+  const filename =
+    safeName + "_Excel_EasyFlow.xlsx";
+
+  XLSX.writeFile(
+    workbook,
+    filename
+  );
+
+  resultArea.innerHTML = `
+
+    <div class="card">
+
+      <h2>🎉 Your Excel is Ready!</h2>
+
+      <div class="message success">
+
+        Your Inventory & Sales spreadsheet
+        has been created successfully.
+
+      </div>
+
+      <p>
+        📦 Products: <strong>${rows.length}</strong>
+      </p>
+
+      <p>
+        🛒 Units Sold: <strong>${totalUnitsSold}</strong>
+      </p>
+
+      <p>
+        💰 Total Sales:
+        <strong>₱${totalSales.toFixed(2)}</strong>
+      </p>
+
+      <p>
+        📈 Total Profit:
+        <strong>₱${totalProfit.toFixed(2)}</strong>
+      </p>
+
+      <p>
+        ⚠️ Low Stock / Out of Stock:
+        <strong>${lowStockCount}</strong>
+      </p>
+
+      <button
+        class="download"
+        onclick="downloadAgain('${filename}')"
+      >
+        📥 Download Excel File Again
+      </button>
+
+    </div>
+  `;
+
+  resultArea.scrollIntoView({
+    behavior: "smooth"
+  });
+}
+
+function downloadAgain(filename) {
+
+  alert(
+    "Your Excel file was already generated. " +
+    "If it did not download, please press Generate My Excel again."
+  );
+}
+
+function contactForCustom() {
+
+  window.location.href =
+    "mailto:bautistareineaira34@gmail.com?subject=Custom%20Excel%20Request";
+}
+
+showInventory();
+
+</script>
+
+</body>
+</html>
