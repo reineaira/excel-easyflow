@@ -163,10 +163,6 @@ button {
   color: #315d9b;
 }
 
-.hidden {
-  display: none;
-}
-
 footer {
   text-align: center;
   padding: 30px 15px;
@@ -213,7 +209,6 @@ ul {
 
 <header>
   <h1>📊 Excel EasyFlow</h1>
-
   <p>
     Tell us what you need. We build the spreadsheet for you.
   </p>
@@ -507,16 +502,12 @@ function generateExcel() {
     Number(document.getElementById("lowStockLevel").value) || 0;
 
   if (!businessName) {
-
     alert("Please enter your Business Name.");
-
     return;
   }
 
   if (products.length === 0) {
-
     alert("Please add at least one product.");
-
     return;
   }
 
@@ -535,11 +526,8 @@ function generateExcel() {
   const rows = [];
 
   let totalSales = 0;
-
   let totalProfit = 0;
-
   let totalUnitsSold = 0;
-
   let lowStockCount = 0;
 
   products.forEach(function(id) {
@@ -587,12 +575,10 @@ function generateExcel() {
     }
 
     totalSales += sales;
-
     totalProfit += profit;
-
     totalUnitsSold += unitsSold;
 
-    const row = {
+    rows.push({
       "Product": name,
       "Category": category,
       "Cost Price": cost,
@@ -603,9 +589,7 @@ function generateExcel() {
       "Total Sales": sales,
       "Profit": profit,
       "Stock Status": stockStatus
-    };
-
-    rows.push(row);
+    });
 
   });
 
@@ -655,7 +639,6 @@ function generateExcel() {
         font: {
           bold: true
         },
-
         alignment: {
           horizontal: "center"
         }
@@ -807,7 +790,7 @@ function generateExcel() {
 
       <button
         class="download"
-        onclick="downloadAgain('${filename}')"
+        onclick="downloadAgain()"
       >
         📥 Download Excel File Again
       </button>
@@ -820,18 +803,20 @@ function generateExcel() {
   });
 }
 
-function downloadAgain(filename) {
+function downloadAgain() {
 
   alert(
     "Your Excel file was already generated. " +
     "If it did not download, please press Generate My Excel again."
   );
+
 }
 
 function contactForCustom() {
 
   window.location.href =
     "mailto:bautistareineaira34@gmail.com?subject=Custom%20Excel%20Request";
+
 }
 
 showInventory();
