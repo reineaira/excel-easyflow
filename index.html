@@ -442,21 +442,13 @@ function generateExcel() {
     rows.push({
 
       "Product": name,
-
       "Category": category,
-
       "Cost Price": cost,
-
       "Selling Price": selling,
-
       "Starting Stock": stock,
-
       "Units Sold": sold,
-
       "Remaining Stock": remaining,
-
       "Total Sales": sales,
-
       "Profit": profit
 
     });
@@ -485,25 +477,30 @@ function generateExcel() {
     { wch: 14 }
   ];
 
-  const headerRange = XLSX.utils.decode_range(worksheet["!ref"]);
+  const headerRange =
+    XLSX.utils.decode_range(worksheet["!ref"]);
 
-  for (let C = headerRange.s.c; C <= headerRange.e.c; C++) {
+  for (
+    let C = headerRange.s.c;
+    C <= headerRange.e.c;
+    C++
+  ) {
 
     const cell =
-      worksheet[XLSX.utils.encode_cell({ r: 0, c: C })];
+      worksheet[XLSX.utils.encode_cell({
+        r: 0,
+        c: C
+      })];
 
     if (cell) {
 
       cell.s = {
-
         font: {
           bold: true
         },
-
         alignment: {
           horizontal: "center"
         }
-
       };
 
     }
@@ -589,30 +586,39 @@ function downloadExcel() {
 
 addProduct();
 
-document.getElementById("toolChoice").addEventListener("change", function () {
+document.getElementById("toolChoice")
+  .addEventListener("change", function () {
 
-  const message = document.getElementById("toolMessage");
+    const message =
+      document.getElementById("toolMessage");
 
-  if (this.value === "inventory") {
+    if (this.value === "inventory") {
 
-    message.innerHTML =
-      "📦 Inventory selected. Let's build your inventory!";
+      message.innerHTML =
+        "📦 Inventory selected. Let's build your inventory!";
 
-    document.getElementById("inventoryForm").innerHTML = `
-      <h3>📦 Inventory Setup</h3>
-      <p>Let's start with your inventory.</p>
-    `;
+      document.getElementById("inventoryForm").innerHTML = `
+        <h3>📦 Inventory Setup</h3>
+        <p>Let's start with your business information.</p>
 
-  } else {
+        <label>Business Name</label>
+        <input
+          type="text"
+          id="inventoryBusinessName"
+          placeholder="Example: Sweet Corner"
+        >
+      `;
 
-    message.innerHTML =
-      "✨ EasyFlow is preparing this workflow.";
+    } else {
 
-    document.getElementById("inventoryForm").innerHTML = "";
+      message.innerHTML =
+        "✨ EasyFlow is preparing this workflow.";
 
-  }
+      document.getElementById("inventoryForm").innerHTML = "";
 
-});
+    }
+
+  });
 
 function contactForCustom() {
 
