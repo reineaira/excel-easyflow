@@ -685,6 +685,157 @@ function resetEasyFlow(){
 }
 
 setProgress(0,"Waiting for a client task...");
+ /* ================================
+   EASYFLOW AI WORK BRAIN BRIDGE
+   ================================ */
+
+const EASYFLOW_BRAIN_URL =
+  "https://easyflow-ai-brain.grettabaliw.workers.dev";
+
+window.analyzeTask = async function () {
+  if (EasyFlow.running) return;
+
+  const task = document.getElementById("taskInput").value.trim();
+
+  if (!task) {
+    alert("Please paste the client's instructions first.");
+    return;
+  }
+
+  EasyFlow.task = task;
+
+  const notice = document.getElementById("understandingNotice");
+
+  try {
+    if (notice) {
+      notice.textContent = "EasyFlow AI Work Brain is understanding the job...";
+    }
+
+    /* Read uploaded workbook locally */
+    if (typeof readUploadedFiles === "function") {
+      await readUploadedFiles();
+    }
+
+    const firstSource =
+      EasyFlow.sources && EasyFlow.sources.length
+        ? EasyFlow.sources[0]
+        : null;
+
+    const workbook = {
+      fileName: firstSource?.file || "",
+      sheetName: firstSource?.sheet || "",
+      rowCount: firstSource?.data?.length || 0,
+      columnCount: firstSource?.headers?.length || 0,
+      headers: Array.isArray(firstSource?.headers)
+        ? firstSource.headers.slice(0, 50)
+        : [],
+      sampleRows: Array.isArray(firstSource?.data)
+        ? firstSource.data.slice(0, 5)
+        : []
+    };
+
+    /* Ask the secure Cloudflare AI Brain for the plan */
+    const response = await fetch(
+      `${EASYFLOW_BRAIN_URL}/api/brain`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          task,
+          workbook
+        })
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Brain request failed: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (!result.ok || !result.plan) {
+      throw new Error("Invalid AI plan received.");
+    }
+
+    const plan = result.plan;
+
+    EasyFlow.aiPlan = plan;
+    EasyFlow.aiQualityChecks = plan.qualityChecks || [];
+
+    /* Convert AI operations into EasyFlow's existing format */
+    EasyFlow.detectedOperations = Array.isArray(plan.operations)
+      ? plan.operations.map(function (op) {
+          return {
+            key: op.key,
+            title: op.label,
+            description: op.reason
+          };
+        })
+      : [];
+
+    if (!EasyFlow.detectedOperations.length) {
+      EasyFlow.detectedOperations = detectOperations(task);
+    }
+
+    /* Show AI status */
+    if (notice) {
+      notice.textContent =
+        result.source === "ai"
+          ? "AI Work Brain understood the client's request and created the workflow."
+          : "AI Work Brain is temporarily using the backup planning engine.";
+    }
+
+    buildPlan();
+    renderUnderstanding();
+
+    document
+      .getElementById("understandingCard")
+      .classList.remove("hidden");
+
+    document
+      .getElementById("planCard")
+      .classList.remove("hidden");
+
+    window.scrollTo({
+      top:
+        document.getElementById("understandingCard").offsetTop - 20,
+      behavior: "smooth"
+    });
+
+  } catch (error) {
+    console.error("EasyFlow AI Brain error:", error);
+
+    /* Keep EasyFlow working even if AI is unavailable */
+    EasyFlow.detectedOperations = detectOperations(task);
+
+    EasyFlow.aiPlan = null;
+    EasyFlow.aiQualityChecks = [];
+
+    if (notice) {
+      notice.textContent =
+        "AI Work Brain is temporarily unavailable. EasyFlow is using its backup planning engine.";
+    }
+
+    buildPlan();
+    renderUnderstanding();
+
+    document
+      .getElementById("understandingCard")
+      .classList.remove("hidden");
+
+    document
+      .getElementById("planCard")
+      .classList.remove("hidden");
+
+    window.scrollTo({
+      top:
+        document.getElementById("understandingCard").offsetTop - 20,
+      behavior: "smooth"
+    });
+  }
+};
 </script>
 </body>
 </html>
