@@ -3,2255 +3,688 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Excel EasyFlow — Freelancer Work Buddy</title>
-
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-
 <style>
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-}
-
+*{box-sizing:border-box;margin:0;padding:0}
 :root{
-    --primary:#6d4aff;
-    --primary-dark:#5132d9;
-    --bg:#f6f7fb;
-    --card:#ffffff;
-    --text:#202124;
-    --muted:#6b7280;
-    --border:#e5e7eb;
-    --success:#16a34a;
-    --warning:#f59e0b;
-    --danger:#dc2626;
+ --primary:#6d4aff;--primary-dark:#5132d9;--bg:#f6f7fb;--card:#fff;
+ --text:#202124;--muted:#6b7280;--border:#e5e7eb;--success:#16a34a;
+ --warning:#d97706;--danger:#dc2626;--info:#2563eb
 }
-
-body{
-    font-family:Inter,Arial,sans-serif;
-    background:var(--bg);
-    color:var(--text);
-    min-height:100vh;
-}
-
-header{
-    background:linear-gradient(135deg,#6847ff,#8b5cf6);
-    color:white;
-    padding:28px 20px 70px;
-}
-
-.header-inner{
-    max-width:1100px;
-    margin:auto;
-}
-
-.logo{
-    display:flex;
-    align-items:center;
-    gap:12px;
-    font-size:22px;
-    font-weight:800;
-}
-
-.logo-icon{
-    width:42px;
-    height:42px;
-    border-radius:12px;
-    background:rgba(255,255,255,.18);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:22px;
-}
-
-.header-title{
-    margin-top:38px;
-    max-width:760px;
-}
-
-.header-title h1{
-    font-size:38px;
-    line-height:1.1;
-    margin-bottom:12px;
-}
-
-.header-title p{
-    font-size:17px;
-    line-height:1.6;
-    opacity:.92;
-}
-
-.container{
-    max-width:1100px;
-    margin:-42px auto 60px;
-    padding:0 18px;
-}
-
-.card{
-    background:white;
-    border:1px solid var(--border);
-    border-radius:20px;
-    box-shadow:0 12px 35px rgba(30,30,50,.07);
-    padding:24px;
-    margin-bottom:20px;
-}
-
-.card h2{
-    font-size:20px;
-    margin-bottom:7px;
-}
-
-.card-subtitle{
-    color:var(--muted);
-    font-size:14px;
-    margin-bottom:18px;
-}
-
-textarea{
-    width:100%;
-    min-height:150px;
-    resize:vertical;
-    border:2px solid var(--border);
-    border-radius:14px;
-    padding:16px;
-    font-size:16px;
-    outline:none;
-    transition:.2s;
-}
-
-textarea:focus{
-    border-color:var(--primary);
-}
-
-.upload-box{
-    margin-top:15px;
-    border:2px dashed #cfd3df;
-    border-radius:15px;
-    padding:22px;
-    text-align:center;
-    cursor:pointer;
-    background:#fafaff;
-    transition:.2s;
-}
-
-.upload-box:hover{
-    border-color:var(--primary);
-    background:#f7f5ff;
-}
-
-.upload-box input{
-    display:none;
-}
-
-.upload-icon{
-    font-size:30px;
-    margin-bottom:8px;
-}
-
-.upload-title{
-    font-weight:700;
-}
-
-.upload-help{
-    color:var(--muted);
-    font-size:13px;
-    margin-top:5px;
-}
-
-.file-list{
-    margin-top:12px;
-}
-
-.file-item{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-    padding:10px 12px;
-    background:#f5f6fa;
-    border-radius:10px;
-    margin-top:7px;
-    font-size:14px;
-}
-
-button{
-    border:none;
-    border-radius:12px;
-    padding:13px 18px;
-    font-weight:700;
-    font-size:14px;
-    cursor:pointer;
-    transition:.2s;
-}
-
-button:hover{
-    transform:translateY(-1px);
-}
-
-.btn-primary{
-    background:var(--primary);
-    color:white;
-}
-
-.btn-primary:hover{
-    background:var(--primary-dark);
-}
-
-.btn-secondary{
-    background:#f0efff;
-    color:var(--primary-dark);
-}
-
-.btn-danger{
-    background:#fee2e2;
-    color:#991b1b;
-}
-
-.actions{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    margin-top:18px;
-}
-
-.status{
-    display:none;
-}
-
-.status.active{
-    display:block;
-}
-
-.status-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:12px;
-}
-
-.status-badge{
-    padding:6px 10px;
-    border-radius:20px;
-    font-size:12px;
-    font-weight:800;
-    background:#ede9fe;
-    color:#5b21b6;
-}
-
-.progress{
-    height:10px;
-    background:#eeeef4;
-    border-radius:20px;
-    overflow:hidden;
-}
-
-.progress-bar{
-    height:100%;
-    width:0%;
-    background:linear-gradient(90deg,#6d4aff,#9b7cff);
-    transition:width .4s ease;
-}
-
-.progress-text{
-    margin-top:8px;
-    color:var(--muted);
-    font-size:13px;
-}
-
-.grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:20px;
-}
-
-.plan-step{
-    display:flex;
-    gap:13px;
-    padding:14px 0;
-    border-bottom:1px solid var(--border);
-}
-
-.plan-step:last-child{
-    border-bottom:none;
-}
-
-.step-number{
-    width:30px;
-    height:30px;
-    flex:none;
-    border-radius:50%;
-    background:#ede9fe;
-    color:var(--primary-dark);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:800;
-}
-
-.step-content strong{
-    display:block;
-    margin-bottom:4px;
-}
-
-.step-content span{
-    color:var(--muted);
-    font-size:13px;
-    line-height:1.5;
-}
-
-.result-box{
-    background:#f7f7fb;
-    border-radius:14px;
-    padding:15px;
-}
-
-.result-row{
-    display:flex;
-    justify-content:space-between;
-    padding:9px 0;
-    border-bottom:1px solid #e7e7ed;
-    font-size:14px;
-}
-
-.result-row:last-child{
-    border-bottom:none;
-}
-
-.result-label{
-    color:var(--muted);
-}
-
-.success{
-    color:var(--success);
-    font-weight:800;
-}
-
-.warning{
-    color:var(--warning);
-    font-weight:800;
-}
-
-.log{
-    max-height:260px;
-    overflow:auto;
-    background:#111827;
-    color:#d1d5db;
-    padding:15px;
-    border-radius:12px;
-    font-family:monospace;
-    font-size:12px;
-    line-height:1.7;
-}
-
-.log-line{
-    margin-bottom:3px;
-}
-
-.log-success{
-    color:#86efac;
-}
-
-.log-warning{
-    color:#fde68a;
-}
-
-.log-error{
-    color:#fca5a5;
-}
-
-.hidden{
-    display:none !important;
-}
-
-.empty-state{
-    text-align:center;
-    padding:35px 10px;
-    color:var(--muted);
-}
-
-.feature-grid{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:12px;
-    margin-top:18px;
-}
-
-.feature{
-    background:#f8f8fc;
-    border-radius:14px;
-    padding:15px;
-}
-
-.feature-icon{
-    font-size:22px;
-    margin-bottom:8px;
-}
-
-.feature strong{
-    display:block;
-    margin-bottom:5px;
-}
-
-.feature span{
-    font-size:12px;
-    color:var(--muted);
-    line-height:1.4;
-}
-
-footer{
-    text-align:center;
-    color:#8b8f9b;
-    font-size:12px;
-    padding:10px 20px 35px;
-}
-
-@media(max-width:760px){
-
-    .header-title h1{
-        font-size:30px;
-    }
-
-    .grid{
-        grid-template-columns:1fr;
-    }
-
-    .feature-grid{
-        grid-template-columns:1fr;
-    }
-
-    .card{
-        padding:18px;
-        border-radius:16px;
-    }
-}
+body{font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+header{background:linear-gradient(135deg,#6847ff,#8b5cf6);color:#fff;padding:26px 20px 70px}
+.header-inner{max-width:1100px;margin:auto}
+.logo{display:flex;align-items:center;gap:12px;font-size:22px;font-weight:800}
+.logo-icon{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:22px}
+.header-title{margin-top:34px;max-width:790px}.header-title h1{font-size:38px;line-height:1.1;margin-bottom:12px}.header-title p{font-size:17px;line-height:1.6;opacity:.94}
+.container{max-width:1100px;margin:-42px auto 60px;padding:0 18px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;box-shadow:0 12px 35px rgba(30,30,50,.07);padding:24px;margin-bottom:20px}
+.card h2{font-size:20px;margin-bottom:7px}.card-subtitle{color:var(--muted);font-size:14px;margin-bottom:18px}
+textarea{width:100%;min-height:155px;resize:vertical;border:2px solid var(--border);border-radius:14px;padding:16px;font-size:16px;outline:none;transition:.2s;font-family:inherit}
+textarea:focus{border-color:var(--primary)}
+.upload-box{margin-top:15px;border:2px dashed #cfd3df;border-radius:15px;padding:22px;text-align:center;cursor:pointer;background:#fafaff;transition:.2s}
+.upload-box:hover{border-color:var(--primary);background:#f7f5ff}.upload-box input{display:none}
+.upload-icon{font-size:30px;margin-bottom:8px}.upload-title{font-weight:700}.upload-help{color:var(--muted);font-size:13px;margin-top:5px}
+.file-list{margin-top:12px}.file-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;background:#f5f6fa;border-radius:10px;margin-top:7px;font-size:14px}
+.file-meta{color:var(--muted);font-size:12px}
+button{border:none;border-radius:12px;padding:13px 18px;font-weight:700;font-size:14px;cursor:pointer;transition:.2s}
+button:hover{transform:translateY(-1px)}button:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}
+.btn-secondary{background:#f0efff;color:var(--primary-dark)}.btn-danger{background:#fee2e2;color:#991b1b}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.status{display:none}.status.active{display:block}
+.status-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.status-badge{padding:6px 10px;border-radius:20px;font-size:12px;font-weight:800;background:#ede9fe;color:#5b21b6}
+.progress{height:10px;background:#eeeef4;border-radius:20px;overflow:hidden}.progress-bar{height:100%;width:0;background:linear-gradient(90deg,#6d4aff,#9b7cff);transition:width .4s}
+.progress-text{margin-top:8px;color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}.plan-step{display:flex;gap:13px;padding:14px 0;border-bottom:1px solid var(--border)}
+.plan-step:last-child{border-bottom:none}.step-number{width:30px;height:30px;flex:none;border-radius:50%;background:#ede9fe;color:var(--primary-dark);display:flex;align-items:center;justify-content:center;font-weight:800}
+.step-content strong{display:block;margin-bottom:4px}.step-content span{color:var(--muted);font-size:13px;line-height:1.5}
+.result-box{background:#f7f7fb;border-radius:14px;padding:15px}.result-row{display:flex;justify-content:space-between;gap:15px;padding:9px 0;border-bottom:1px solid #e7e7ed;font-size:14px}.result-row:last-child{border-bottom:none}.result-label{color:var(--muted)}
+.success{color:var(--success);font-weight:800}.warning{color:var(--warning);font-weight:800}.info{color:var(--info);font-weight:800}
+.log{max-height:290px;overflow:auto;background:#111827;color:#d1d5db;padding:15px;border-radius:12px;font-family:monospace;font-size:12px;line-height:1.7}
+.log-line{margin-bottom:3px}.log-success{color:#86efac}.log-warning{color:#fde68a}.log-error{color:#fca5a5}
+.hidden{display:none!important}.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+.feature{background:#f8f8fc;border-radius:14px;padding:15px}.feature-icon{font-size:22px;margin-bottom:8px}.feature strong{display:block;margin-bottom:5px}.feature span{font-size:12px;color:var(--muted);line-height:1.4}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.chip{padding:6px 9px;border-radius:999px;background:#f0efff;color:#5b21b6;font-size:12px;font-weight:700}
+.notice{padding:12px 14px;border-radius:12px;background:#eff6ff;color:#1e40af;font-size:13px;line-height:1.5;margin-top:14px}
+.notice.warning{background:#fffbeb;color:#92400e}.notice.success{background:#f0fdf4;color:#166534}
+footer{text-align:center;color:#8b8f9b;font-size:12px;padding:10px 20px 35px}
+@media(max-width:760px){.header-title h1{font-size:30px}.grid,.feature-grid{grid-template-columns:1fr}.card{padding:18px;border-radius:16px}.result-row{align-items:flex-start;flex-direction:column;gap:3px}}
 </style>
 </head>
-
 <body>
-
 <header>
-    <div class="header-inner">
-
-        <div class="logo">
-            <div class="logo-icon">⚡</div>
-            <div>Excel EasyFlow</div>
-        </div>
-
-        <div class="header-title">
-            <h1>Your Freelancer Work Buddy</h1>
-            <p>
-                Give EasyFlow the client's task.
-                EasyFlow understands the work, builds the workflow,
-                processes the files, checks the result, and prepares
-                the client-ready output.
-            </p>
-        </div>
-
-    </div>
+<div class="header-inner">
+<div class="logo"><div class="logo-icon">⚡</div><div>Excel EasyFlow</div></div>
+<div class="header-title">
+<h1>Your Freelancer Work Buddy</h1>
+<p>Give EasyFlow the client's task. EasyFlow understands the work, inspects the files, builds the workflow, performs the work, checks the result, and prepares the client-ready output.</p>
+</div>
+</div>
 </header>
-
 
 <main class="container">
 
-    <!-- TASK CENTER -->
-
-    <section class="card">
-
-        <h2>👋 What did your client ask you to do?</h2>
-
-        <p class="card-subtitle">
-            Paste the client's instructions here. You don't need to know
-            which Excel tool to use. EasyFlow will figure out the work.
-        </p>
-
-        <textarea
-            id="taskInput"
-            placeholder="Example:
-
-Please clean this customer list, remove duplicate customers,
-standardize the names and phone numbers, sort it by customer name,
-and send me the finished Excel file."></textarea>
-
-
-        <label class="upload-box">
-
-            <input
-                type="file"
-                id="fileInput"
-                multiple
-                accept=".xlsx,.xls,.csv">
-
-            <div class="upload-icon">📁</div>
-
-            <div class="upload-title">
-                Upload the client's files
-            </div>
-
-            <div class="upload-help">
-                Excel or CSV files • You can upload multiple files
-            </div>
-
-        </label>
-
-
-        <div id="fileList" class="file-list"></div>
-
-
-        <div class="actions">
-
-            <button
-                class="btn-primary"
-                onclick="analyzeTask()">
-                🧠 Analyze & Build Workflow
-            </button>
-
-            <button
-                class="btn-secondary"
-                onclick="loadDemo()">
-                ✨ Try Demo Task
-            </button>
-
-            <button
-                class="btn-danger"
-                onclick="resetEasyFlow()">
-                Reset
-            </button>
-
-        </div>
-
-    </section>
-
-
-    <!-- UNDERSTANDING -->
-
-    <section
-        id="understandingCard"
-        class="card hidden">
-
-        <h2>🧠 EasyFlow understood the job</h2>
-
-        <p class="card-subtitle">
-            Here's how EasyFlow interpreted the client's request.
-        </p>
-
-        <div class="result-box">
-
-            <div class="result-row">
-                <span class="result-label">Main job</span>
-                <strong id="mainJob">—</strong>
-            </div>
-
-            <div class="result-row">
-                <span class="result-label">Files</span>
-                <strong id="fileCount">0</strong>
-            </div>
-
-            <div class="result-row">
-                <span class="result-label">Operations detected</span>
-                <strong id="operationCount">0</strong>
-            </div>
-
-            <div class="result-row">
-                <span class="result-label">Output</span>
-                <strong>Client-ready Excel workbook</strong>
-            </div>
-
-        </div>
-
-    </section>
-
-
-    <!-- WORKFLOW PLAN -->
-
-    <section
-        id="planCard"
-        class="card hidden">
-
-        <h2>🛠️ Work Plan</h2>
-
-        <p class="card-subtitle">
-            EasyFlow will perform these steps automatically.
-        </p>
-
-        <div id="planList"></div>
-
-        <div class="actions">
-
-            <button
-                class="btn-primary"
-                onclick="runEasyFlow()">
-                ▶ Run EasyFlow
-            </button>
-
-        </div>
-
-    </section>
-
-
-    <!-- PROCESSING -->
-
-    <section
-        id="statusCard"
-        class="card status">
-
-        <div class="status-header">
-
-            <div>
-                <h2>⚙️ EasyFlow is working</h2>
-            </div>
-
-            <div
-                id="statusBadge"
-                class="status-badge">
-                Working
-            </div>
-
-        </div>
-
-        <div class="progress">
-            <div
-                id="progressBar"
-                class="progress-bar"></div>
-        </div>
-
-        <div
-            id="progressText"
-            class="progress-text">
-            Starting...
-        </div>
-
-    </section>
-
-
-    <!-- WORK LOG -->
-
-    <section
-        id="logCard"
-        class="card hidden">
-
-        <h2>📋 Work Log</h2>
-
-        <p class="card-subtitle">
-            EasyFlow's production activity.
-        </p>
-
-        <div
-            id="workLog"
-            class="log"></div>
-
-    </section>
-
-
-    <!-- RESULTS -->
-
-    <section
-        id="resultCard"
-        class="card hidden">
-
-        <h2>✅ Work Completed</h2>
-
-        <p class="card-subtitle">
-            EasyFlow finished the job and performed a quality check.
-        </p>
-
-        <div class="grid">
-
-            <div class="result-box">
-
-                <div class="result-row">
-                    <span class="result-label">
-                        Original rows
-                    </span>
-                    <strong id="originalRows">
-                        0
-                    </strong>
-                </div>
-
-                <div class="result-row">
-                    <span class="result-label">
-                        Final rows
-                    </span>
-                    <strong id="finalRows">
-                        0
-                    </strong>
-                </div>
-
-                <div class="result-row">
-                    <span class="result-label">
-                        Duplicates removed
-                    </span>
-                    <strong
-                        id="duplicatesRemoved"
-                        class="success">
-                        0
-                    </strong>
-                </div>
-
-                <div class="result-row">
-                    <span class="result-label">
-                        Quality issues
-                    </span>
-                    <strong
-                        id="qualityIssues"
-                        class="success">
-                        0
-                    </strong>
-                </div>
-
-            </div>
-
-
-            <div class="result-box">
-
-                <strong>Quality Check</strong>
-
-                <div
-                    id="qualityMessage"
-                    style="margin-top:12px;color:#6b7280;font-size:13px;line-height:1.6;">
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="actions">
-
-            <button
-                class="btn-primary"
-                onclick="downloadResult()">
-                📥 Download Client-Ready Excel
-            </button>
-
-        </div>
-
-    </section>
-
-
-    <!-- EASYFLOW FEATURES -->
-
-    <section class="card">
-
-        <h2>⚡ What EasyFlow is built to do</h2>
-
-        <p class="card-subtitle">
-            The goal is simple: reduce the amount of work the freelancer
-            has to do.
-        </p>
-
-        <div class="feature-grid">
-
-            <div class="feature">
-                <div class="feature-icon">🧠</div>
-                <strong>Understand</strong>
-                <span>
-                    Understand what the client actually wants.
-                </span>
-            </div>
-
-            <div class="feature">
-                <div class="feature-icon">🛠️</div>
-                <strong>Work</strong>
-                <span>
-                    Turn the request into practical work steps.
-                </span>
-            </div>
-
-            <div class="feature">
-                <div class="feature-icon">🔍</div>
-                <strong>Check</strong>
-                <span>
-                    Check the result before giving it back.
-                </span>
-            </div>
-
-        </div>
-
-    </section>
-
+<section class="card">
+<h2>👋 What did your client ask you to do?</h2>
+<p class="card-subtitle">Paste the client's instructions. You do not need to choose an Excel tool first. EasyFlow will determine the work it can perform.</p>
+<textarea id="taskInput" placeholder="Example:
+Please clean this customer list, remove duplicate customers, standardize the names and phone numbers, sort it by customer name, and prepare the finished Excel file for the client."></textarea>
+
+<label class="upload-box">
+<input type="file" id="fileInput" multiple accept=".xlsx,.xls,.csv">
+<div class="upload-icon">📁</div>
+<div class="upload-title">Upload the client's files</div>
+<div class="upload-help">Excel or CSV • Multiple files and multiple sheets supported</div>
+</label>
+<div id="fileList" class="file-list"></div>
+
+<div class="actions">
+<button class="btn-primary" id="analyzeBtn" onclick="analyzeTask()">🧠 Analyze & Build Workflow</button>
+<button class="btn-secondary" onclick="loadDemo()">✨ Try Demo Task</button>
+<button class="btn-danger" onclick="resetEasyFlow()">Reset</button>
+</div>
+</section>
+
+<section id="understandingCard" class="card hidden">
+<h2>🧠 EasyFlow understood the job</h2>
+<p class="card-subtitle">This is EasyFlow's current interpretation before it starts production.</p>
+<div class="result-box">
+<div class="result-row"><span class="result-label">Main job</span><strong id="mainJob">—</strong></div>
+<div class="result-row"><span class="result-label">Files selected</span><strong id="fileCount">0</strong></div>
+<div class="result-row"><span class="result-label">Data sources found</span><strong id="sourceCount">0</strong></div>
+<div class="result-row"><span class="result-label">Operations detected</span><strong id="operationCount">0</strong></div>
+<div class="result-row"><span class="result-label">Output</span><strong>Client-ready Excel workbook</strong></div>
+</div>
+<div id="operationChips" class="chips"></div>
+<div id="understandingNotice"></div>
+</section>
+
+<section id="planCard" class="card hidden">
+<h2>🛠️ Work Plan</h2>
+<p class="card-subtitle">EasyFlow will follow this production plan. The freelancer remains the final reviewer.</p>
+<div id="planList"></div>
+<div class="actions">
+<button class="btn-primary" id="runBtn" onclick="runEasyFlow()">▶ Run EasyFlow</button>
+</div>
+</section>
+
+<section id="statusCard" class="card status">
+<div class="status-header"><h2>⚙️ EasyFlow is working</h2><div id="statusBadge" class="status-badge">Working</div></div>
+<div class="progress"><div id="progressBar" class="progress-bar"></div></div>
+<div id="progressText" class="progress-text">Starting...</div>
+</section>
+
+<section id="logCard" class="card hidden">
+<h2>📋 Work Log</h2>
+<p class="card-subtitle">Production activity and quality-control events.</p>
+<div id="workLog" class="log"></div>
+</section>
+
+<section id="resultCard" class="card hidden">
+<h2>✅ Work Completed</h2>
+<p class="card-subtitle">EasyFlow finished the automated work and generated a deliverable. Review it before sending it to the client.</p>
+<div class="grid">
+<div class="result-box">
+<div class="result-row"><span class="result-label">Original rows</span><strong id="originalRows">0</strong></div>
+<div class="result-row"><span class="result-label">Final rows</span><strong id="finalRows">0</strong></div>
+<div class="result-row"><span class="result-label">Duplicates removed</span><strong id="duplicatesRemoved" class="success">0</strong></div>
+<div class="result-row"><span class="result-label">Blank rows removed</span><strong id="blankRowsRemoved" class="success">0</strong></div>
+<div class="result-row"><span class="result-label">Quality issues</span><strong id="qualityIssues" class="success">0</strong></div>
+</div>
+<div class="result-box">
+<strong>Quality Check</strong>
+<div id="qualityMessage" style="margin-top:12px;color:#6b7280;font-size:13px;line-height:1.6"></div>
+</div>
+</div>
+<div class="actions">
+<button class="btn-primary" onclick="downloadResult()">📥 Download Client-Ready Excel</button>
+<button class="btn-secondary" onclick="resetEasyFlow()">Start Another Job</button>
+</div>
+</section>
+
+<section class="card">
+<h2>⚡ What EasyFlow is built to do</h2>
+<p class="card-subtitle">Every feature should reduce freelancer work. If it does not, it is not the priority.</p>
+<div class="feature-grid">
+<div class="feature"><div class="feature-icon">🧠</div><strong>Understand</strong><span>Turn client instructions into a practical work plan instead of forcing the freelancer to choose tools.</span></div>
+<div class="feature"><div class="feature-icon">🛠️</div><strong>Work</strong><span>Process supported spreadsheet tasks automatically and keep a clear production log.</span></div>
+<div class="feature"><div class="feature-icon">🔍</div><strong>Check</strong><span>Run quality checks and make the freelancer the final reviewer before delivery.</span></div>
+</div>
+<div class="notice">AI Work Brain note: this version has a stronger local planning engine, but a secure server-side AI connection is still required for true open-ended AI reasoning. Never place a private AI API key directly in this GitHub Pages file.</div>
+</section>
 </main>
 
-
-<footer>
-    Excel EasyFlow — The Freelancer's Smart Work Buddy
-</footer>
-
+<footer>Excel EasyFlow — The Freelancer's Smart Work Buddy</footer>
 
 <script>
+"use strict";
 
-/* =========================================================
-   EASYFLOW STATE
-========================================================= */
-
-const EasyFlow = {
-
-    task: "",
-
-    files: [],
-
-    plan: [],
-
-    data: [],
-
-    headers: [],
-
-    originalRows: 0,
-
-    finalRows: 0,
-
-    duplicatesRemoved: 0,
-
-    qualityIssues: 0,
-
-    resultWorkbook: null,
-
-    detectedOperations: []
-
+const EasyFlow={
+ task:"",
+ files:[],
+ sources:[],
+ plan:[],
+ data:[],
+ headers:[],
+ originalRows:0,
+ finalRows:0,
+ duplicatesRemoved:0,
+ blankRowsRemoved:0,
+ qualityIssues:0,
+ resultWorkbook:null,
+ detectedOperations:[],
+ running:false
 };
 
-
-/* =========================================================
-   FILE HANDLING
-========================================================= */
-
-document
-    .getElementById("fileInput")
-    .addEventListener("change", function(event){
-
-        EasyFlow.files = Array.from(event.target.files);
-
-        renderFileList();
-
-    });
-
+document.getElementById("fileInput").addEventListener("change",e=>{
+ EasyFlow.files=Array.from(e.target.files||[]);
+ renderFileList();
+});
 
 function renderFileList(){
-
-    const container =
-        document.getElementById("fileList");
-
-    container.innerHTML = "";
-
-    if(EasyFlow.files.length === 0){
-
-        return;
-
-    }
-
-    EasyFlow.files.forEach((file,index)=>{
-
-        const div =
-            document.createElement("div");
-
-        div.className = "file-item";
-
-        div.innerHTML = `
-            <span>📄 ${escapeHtml(file.name)}</span>
-            <span>${formatFileSize(file.size)}</span>
-        `;
-
-        container.appendChild(div);
-
-    });
-
+ const box=document.getElementById("fileList");
+ box.innerHTML="";
+ EasyFlow.files.forEach(file=>{
+  const div=document.createElement("div");
+  div.className="file-item";
+  div.innerHTML=`<span>📄 ${escapeHtml(file.name)}</span><span class="file-meta">${formatFileSize(file.size)}</span>`;
+  box.appendChild(div);
+ });
 }
-
 
 function formatFileSize(bytes){
-
-    if(bytes < 1024)
-        return bytes + " B";
-
-    if(bytes < 1024*1024)
-        return (bytes/1024).toFixed(1) + " KB";
-
-    return (bytes/(1024*1024)).toFixed(1) + " MB";
-
+ if(bytes<1024)return bytes+" B";
+ if(bytes<1024*1024)return (bytes/1024).toFixed(1)+" KB";
+ return (bytes/(1024*1024)).toFixed(1)+" MB";
 }
-
 
 function escapeHtml(value){
-
-    return String(value)
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-
+ return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 }
-
-
-/* =========================================================
-   TASK UNDERSTANDING
-========================================================= */
 
 function detectOperations(task){
+ const text=String(task).toLowerCase();
+ const operations=[];
+ const add=(key,title,description)=>operations.push({key,title,description});
 
-    const text =
-        task.toLowerCase();
+ if(/duplicate|duplicates|doble|paulit|ulit|repeated records|repetitive/.test(text))
+  add("duplicates","Remove duplicate records","Find repeated records and keep one clean copy.");
 
-    const operations = [];
+ if(/clean|cleanup|cleaning|linisin|ayusin|ayos|tidy|messy|inconsistent/.test(text))
+  add("clean","Clean the data","Trim spaces, normalize text and remove empty rows.");
 
-    if(
-        /duplicate|duplicates|doble|paulit|ulit/.test(text)
-    ){
-        operations.push({
-            key:"duplicates",
-            title:"Remove duplicate records",
-            description:
-                "Find repeated records and keep the cleanest version."
-        });
-    }
+ if(/name|names|customer name|client name|employee name|pangalan/.test(text))
+  add("names","Standardize names","Normalize capitalization and spacing in name-related columns.");
 
-    if(
-        /clean|cleanup|cleaning|linisin|ayusin|ayos/.test(text)
-    ){
-        operations.push({
-            key:"clean",
-            title:"Clean the data",
-            description:
-                "Normalize empty values, spaces and inconsistent entries."
-        });
-    }
+ if(/phone|mobile|telephone|contact number|phone number/.test(text))
+  add("phones","Clean phone numbers","Normalize common Philippine phone-number formats.");
 
-    if(
-        /name|names|customer name|pangalan/.test(text)
-    ){
-        operations.push({
-            key:"names",
-            title:"Standardize names",
-            description:
-                "Normalize name formatting and capitalization."
-        });
-    }
+ if(/email|e-mail|email address/.test(text))
+  add("emails","Normalize email addresses","Trim spaces and normalize email text.");
 
-    if(
-        /phone|mobile|telephone|contact number|number/.test(text)
-    ){
-        operations.push({
-            key:"phones",
-            title:"Clean phone numbers",
-            description:
-                "Normalize phone-number formatting."
-        });
-    }
+ if(/sort|sorting|alphabetical|alphabetically|order by|arrange|organize|organise/.test(text))
+  add("sort","Organize the data","Sort records using the most relevant name or text column.");
 
-    if(
-        /email|e-mail/.test(text)
-    ){
-        operations.push({
-            key:"emails",
-            title:"Normalize email addresses",
-            description:
-                "Trim spaces and normalize email formatting."
-        });
-    }
+ if(/report|summary|summarize|summarise|dashboard|analysis|analyze|analyse|totals|breakdown/.test(text))
+  add("summary","Create a summary","Prepare an EasyFlow summary sheet describing the completed work.");
 
-    if(
-        /sort|sorting|ayos.*alphabet|alphabetical|order/.test(text)
-    ){
-        operations.push({
-            key:"sort",
-            title:"Organize the data",
-            description:
-                "Sort the final records into a useful order."
-        });
-    }
+ if(/format|formatting|standardize|standardise|uniform|consistent layout/.test(text))
+  add("format","Standardize formatting","Clean text and apply a consistent workbook structure.");
 
-    if(
-        /report|summary|summarize|dashboard|analysis|analyze|analyser/.test(text)
-    ){
-        operations.push({
-            key:"summary",
-            title:"Create a summary",
-            description:
-                "Create an EasyFlow summary sheet for the client."
-        });
-    }
+ if(/missing|blank|empty|incomplete|kulang|check fields/.test(text))
+  add("missing","Check missing values","Detect missing values and report them in quality control.");
 
-    if(
-        /format|formatting|standardize|standardise|uniform/.test(text)
-    ){
-        operations.push({
-            key:"format",
-            title:"Standardize formatting",
-            description:
-                "Make the workbook consistent and client-ready."
-        });
-    }
+ if(/csv|excel|spreadsheet|xlsx|xls|workbook|sheet|data/.test(text) && operations.length===0)
+  add("clean","Prepare spreadsheet data","Inspect and normalize the supplied spreadsheet data.");
 
-    if(
-        /missing|blank|empty|kulang/.test(text)
-    ){
-        operations.push({
-            key:"missing",
-            title:"Check missing values",
-            description:
-                "Identify blank or incomplete information."
-        });
-    }
+ if(operations.length===0){
+  add("general","Process the client's requested work","Inspect the task and supplied data, then prepare the best supported deliverable.");
+ }
 
-    /*
-       If EasyFlow does not recognize a specific operation,
-       it still creates a general workflow instead of stopping.
-    */
-
-    if(operations.length === 0){
-
-        operations.push({
-            key:"general",
-            title:"Process the client's requested work",
-            description:
-                "Inspect the uploaded data and prepare the requested deliverable."
-        });
-
-        operations.push({
-            key:"quality",
-            title:"Perform quality control",
-            description:
-                "Check the finished output before delivery."
-        });
-
-    }
-
-    return operations;
-
+ return dedupeOperations(operations);
 }
 
-
-/* =========================================================
-   ANALYZE TASK
-========================================================= */
+function dedupeOperations(items){
+ const seen=new Set();
+ return items.filter(item=>{
+  if(seen.has(item.key))return false;
+  seen.add(item.key);
+  return true;
+ });
+}
 
 function analyzeTask(){
+ if(EasyFlow.running)return;
+ const task=document.getElementById("taskInput").value.trim();
+ if(!task){alert("Please paste the client's instructions first.");return;}
 
-    const task =
-        document
-            .getElementById("taskInput")
-            .value
-            .trim();
+ EasyFlow.task=task;
+ EasyFlow.detectedOperations=detectOperations(task);
+ buildPlan();
+ renderUnderstanding();
 
-    if(!task){
+ document.getElementById("understandingCard").classList.remove("hidden");
+ document.getElementById("planCard").classList.remove("hidden");
 
-        alert(
-            "Please paste the client's instructions first."
-        );
-
-        return;
-
-    }
-
-    EasyFlow.task = task;
-
-    EasyFlow.detectedOperations =
-        detectOperations(task);
-
-    buildPlan();
-
-    document
-        .getElementById("understandingCard")
-        .classList.remove("hidden");
-
-    document
-        .getElementById("planCard")
-        .classList.remove("hidden");
-
-    document
-        .getElementById("mainJob")
-        .textContent =
-        createMainJob(EasyFlow.detectedOperations);
-
-    document
-        .getElementById("fileCount")
-        .textContent =
-        EasyFlow.files.length;
-
-    document
-        .getElementById("operationCount")
-        .textContent =
-        EasyFlow.detectedOperations.length;
-
-    window.scrollTo({
-        top:
-            document
-                .getElementById("understandingCard")
-                .offsetTop - 20,
-        behavior:"smooth"
-    });
-
+ window.scrollTo({top:document.getElementById("understandingCard").offsetTop-20,behavior:"smooth"});
 }
-
 
 function createMainJob(operations){
-
-    if(
-        operations.length === 1 &&
-        operations[0].key === "general"
-    ){
-        return "General client task";
-    }
-
-    return operations
-        .slice(0,3)
-        .map(item => item.title)
-        .join(" + ");
-
+ if(operations.length===1&&operations[0].key==="general")return "General client task";
+ return operations.slice(0,3).map(x=>x.title).join(" + ");
 }
 
+function renderUnderstanding(){
+ document.getElementById("mainJob").textContent=createMainJob(EasyFlow.detectedOperations);
+ document.getElementById("fileCount").textContent=EasyFlow.files.length;
+ document.getElementById("sourceCount").textContent=EasyFlow.sources.length||"Will inspect on run";
+ document.getElementById("operationCount").textContent=EasyFlow.detectedOperations.length;
 
-/* =========================================================
-   BUILD WORKFLOW
-========================================================= */
+ const chips=document.getElementById("operationChips");
+ chips.innerHTML=EasyFlow.detectedOperations.map(x=>`<span class="chip">${escapeHtml(x.title)}</span>`).join("");
+
+ const notice=document.getElementById("understandingNotice");
+ const needsFile=/file|excel|spreadsheet|csv|workbook|sheet|list|data|report|clean|sort|duplicate|format/.test(EasyFlow.task.toLowerCase());
+ notice.innerHTML=needsFile&&!EasyFlow.files.length
+  ? `<div class="notice warning">⚠ The request appears to involve data or files, but no file was uploaded. EasyFlow can still build the plan, but the actual spreadsheet work will require the client's file.</div>`
+  : `<div class="notice success">✓ EasyFlow has a workable production plan. You can run it now.</div>`;
+}
 
 function buildPlan(){
+ const plan=[
+  {title:"Understand the client's request",description:"Translate the instructions into concrete actions and identify the expected deliverable."},
+  {title:"Inspect supplied files",description:EasyFlow.files.length?"Read all supported Excel/CSV files and inspect their sheets and structure.":"Check whether the task can be completed without a source file."}
+ ];
 
-    const plan = [];
+ EasyFlow.detectedOperations.forEach(op=>plan.push({title:op.title,description:op.description}));
 
-    plan.push({
-        title:"Understand the client's request",
-        description:
-            "Translate the client's instructions into actionable work."
-    });
+ plan.push(
+  {title:"Perform quality control",description:"Check duplicates, blank rows, structure and other relevant issues after processing."},
+  {title:"Prepare the client-ready deliverable",description:"Create a clean workbook with processed data, a work summary and a quality-check sheet."}
+ );
 
-    plan.push({
-        title:"Inspect the supplied files",
-        description:
-            EasyFlow.files.length
-                ? "Read the uploaded Excel/CSV files and identify their structure."
-                : "Check the task and prepare the required output structure."
-    });
-
-    EasyFlow.detectedOperations.forEach(operation=>{
-
-        plan.push({
-            title:operation.title,
-            description:operation.description
-        });
-
-    });
-
-    plan.push({
-        title:"Perform quality control",
-        description:
-            "Check the result for duplicates, missing values and structural problems."
-    });
-
-    plan.push({
-        title:"Prepare the client-ready deliverable",
-        description:
-            "Create a clean Excel workbook containing the finished work."
-    });
-
-    EasyFlow.plan = plan;
-
-    const container =
-        document.getElementById("planList");
-
-    container.innerHTML = "";
-
-    plan.forEach((step,index)=>{
-
-        const div =
-            document.createElement("div");
-
-        div.className = "plan-step";
-
-        div.innerHTML = `
-            <div class="step-number">${index+1}</div>
-
-            <div class="step-content">
-
-                <strong>
-                    ${escapeHtml(step.title)}
-                </strong>
-
-                <span>
-                    ${escapeHtml(step.description)}
-                </span>
-
-            </div>
-        `;
-
-        container.appendChild(div);
-
-    });
-
+ EasyFlow.plan=plan;
+ const list=document.getElementById("planList");
+ list.innerHTML="";
+ plan.forEach((step,i)=>{
+  const div=document.createElement("div");
+  div.className="plan-step";
+  div.innerHTML=`<div class="step-number">${i+1}</div><div class="step-content"><strong>${escapeHtml(step.title)}</strong><span>${escapeHtml(step.description)}</span></div>`;
+  list.appendChild(div);
+ });
 }
-
-
-/* =========================================================
-   RUN EASYFLOW
-========================================================= */
 
 async function runEasyFlow(){
-
-    if(!EasyFlow.task){
-
-        alert("Please analyze a task first.");
-
-        return;
-
-    }
-
-    document
-        .getElementById("statusCard")
-        .classList.add("active");
-
-    document
-        .getElementById("logCard")
-        .classList.remove("hidden");
-
-    document
-        .getElementById("resultCard")
-        .classList.add("hidden");
-
-    clearLog();
-
-    setProgress(
-        5,
-        "EasyFlow is starting..."
-    );
-
-    log(
-        "EasyFlow received the client's request."
-    );
-
-    await wait(500);
-
-    log(
-        "Understanding the task..."
-    );
-
-    await wait(600);
-
-    setProgress(
-        15,
-        "Understanding client instructions..."
-    );
-
-    log(
-        "Workflow created successfully.",
-        "success"
-    );
-
-    await wait(500);
-
-
-    /* Read files */
-
-    let workbookData = [];
-
-    if(EasyFlow.files.length > 0){
-
-        setProgress(
-            25,
-            "Inspecting uploaded files..."
-        );
-
-        log(
-            `Found ${EasyFlow.files.length} uploaded file(s).`
-        );
-
-        workbookData =
-            await readUploadedFiles();
-
-    }
-    else{
-
-        log(
-            "No data file was uploaded. EasyFlow will create the requested workbook structure."
-        );
-
-    }
-
-    await wait(500);
-
-
-    /* Process */
-
-    if(workbookData.length > 0){
-
-        EasyFlow.headers =
-            workbookData[0].headers;
-
-        EasyFlow.data =
-            workbookData[0].rows;
-
-        EasyFlow.originalRows =
-            EasyFlow.data.length;
-
-        log(
-            `Loaded ${EasyFlow.originalRows} data row(s).`
-        );
-
-    }
-    else{
-
-        EasyFlow.headers = [
-            "Task",
-            "Status",
-            "Notes"
-        ];
-
-        EasyFlow.data = [
-            [
-                EasyFlow.task,
-                "Completed",
-                "Processed by EasyFlow"
-            ]
-        ];
-
-        EasyFlow.originalRows = 1;
-
-    }
-
-
-    const totalSteps =
-        EasyFlow.detectedOperations.length;
-
-    let completed = 0;
-
-
-    for(
-        const operation
-        of EasyFlow.detectedOperations
-    ){
-
-        const progress =
-            35 +
-            Math.round(
-                (completed / Math.max(totalSteps,1))
-                * 40
-            );
-
-        setProgress(
-            progress,
-            operation.title + "..."
-        );
-
-        log(
-            "Running: " + operation.title
-        );
-
-        await wait(400);
-
-        runOperation(operation);
-
-        completed++;
-
-        log(
-            "Completed: " + operation.title,
-            "success"
-        );
-
-    }
-
-
-    /* Quality check */
-
-    setProgress(
-        82,
-        "Running quality control..."
-    );
-
-    log(
-        "Checking the processed result..."
-    );
-
-    await wait(700);
-
-    const quality =
-        qualityCheck();
-
-    EasyFlow.qualityIssues =
-        quality.issues;
-
-    log(
-        quality.issues === 0
-            ? "Quality check passed."
-            : `Quality check found ${quality.issues} issue(s).`,
-        quality.issues === 0
-            ? "success"
-            : "warning"
-    );
-
-
-    /* Workbook */
-
-    setProgress(
-        92,
-        "Preparing client-ready workbook..."
-    );
-
-    await wait(600);
-
-    createWorkbook();
-
-    EasyFlow.finalRows =
-        EasyFlow.data.length;
-
-    setProgress(
-        100,
-        "Work completed."
-    );
-
-    document
-        .getElementById("statusBadge")
-        .textContent =
-        "Completed";
-
-    log(
-        "Client-ready workbook is ready.",
-        "success"
-    );
-
-    showResults();
-
+ if(EasyFlow.running)return;
+ if(!EasyFlow.task){alert("Please analyze a task first.");return;}
+
+ EasyFlow.running=true;
+ document.getElementById("runBtn").disabled=true;
+ document.getElementById("analyzeBtn").disabled=true;
+ document.getElementById("statusCard").classList.add("active");
+ document.getElementById("logCard").classList.remove("hidden");
+ document.getElementById("resultCard").classList.add("hidden");
+ document.getElementById("statusBadge").textContent="Working";
+ clearLog();
+
+ try{
+  resetRunStats();
+  setProgress(5,"EasyFlow is starting...");
+  log("Client request received.");
+  await wait(350);
+
+  setProgress(12,"Understanding client instructions...");
+  log("Task interpretation completed.","success");
+  await wait(350);
+
+  setProgress(22,"Inspecting supplied files...");
+  if(EasyFlow.files.length){
+   log(`Inspecting ${EasyFlow.files.length} uploaded file(s).`);
+   EasyFlow.sources=await readUploadedFiles();
+   if(EasyFlow.sources.length)log(`Found ${EasyFlow.sources.length} usable worksheet source(s).`,"success");
+   else log("No usable data rows were found in the uploaded files.","warning");
+  }else{
+   EasyFlow.sources=[];
+   log("No source file uploaded.");
+  }
+  await wait(350);
+
+  initializeWorkingData();
+
+  const operations=EasyFlow.detectedOperations.filter(x=>x.key!=="general");
+  for(let i=0;i<operations.length;i++){
+   const op=operations[i];
+   setProgress(30+Math.round((i/Math.max(operations.length,1))*45),op.title+"...");
+   log("Running: "+op.title);
+   await wait(250);
+   runOperation(op);
+   log("Completed: "+op.title,"success");
+  }
+
+  setProgress(82,"Running quality control...");
+  log("Running final quality control...");
+  await wait(450);
+  const quality=qualityCheck();
+  EasyFlow.qualityIssues=quality.issues;
+  if(quality.issues===0)log("Quality check passed.","success");
+  else log(`Quality check found ${quality.issues} item(s) for review.`,"warning");
+
+  setProgress(92,"Preparing client-ready workbook...");
+  await wait(350);
+  createWorkbook();
+
+  EasyFlow.finalRows=EasyFlow.data.length;
+  setProgress(100,"Work completed.");
+  document.getElementById("statusBadge").textContent="Completed";
+  log("Client-ready workbook is ready for freelancer review.","success");
+  showResults();
+ }catch(error){
+  console.error(error);
+  document.getElementById("statusBadge").textContent="Needs Attention";
+  log("EasyFlow stopped because: "+(error.message||error),"error");
+  setProgress(100,"EasyFlow needs attention.");
+  alert("EasyFlow could not finish this job. Check the Work Log for details.");
+ }finally{
+  EasyFlow.running=false;
+  document.getElementById("runBtn").disabled=false;
+  document.getElementById("analyzeBtn").disabled=false;
+ }
 }
 
-
-/* =========================================================
-   READ EXCEL / CSV
-========================================================= */
+function resetRunStats(){
+ EasyFlow.data=[];EasyFlow.headers=[];EasyFlow.originalRows=0;EasyFlow.finalRows=0;
+ EasyFlow.duplicatesRemoved=0;EasyFlow.blankRowsRemoved=0;EasyFlow.qualityIssues=0;EasyFlow.resultWorkbook=null;
+}
 
 async function readUploadedFiles(){
+ const results=[];
+ for(const file of EasyFlow.files){
+  try{
+   const buffer=await file.arrayBuffer();
+   const workbook=XLSX.read(buffer,{type:"array",cellDates:true});
+   for(const sheetName of workbook.SheetNames){
+    const sheet=workbook.Sheets[sheetName];
+    const rows=XLSX.utils.sheet_to_json(sheet,{header:1,defval:"",raw:false});
+    if(!rows.length)continue;
 
-    const results = [];
+    const width=Math.max(...rows.map(r=>r.length),1);
+    let headers=Array.from({length:width},(_,i)=>String(rows[0]?.[i]??`Column ${i+1}`).trim()||`Column ${i+1}`);
+    const data=rows.slice(1).map(row=>{
+     const out=Array.from({length:width},(_,i)=>row[i]??"");
+     return out;
+    }).filter(row=>row.some(v=>String(v??"").trim()!==""));
 
-    for(const file of EasyFlow.files){
-
-        const buffer =
-            await file.arrayBuffer();
-
-        const workbook =
-            XLSX.read(
-                buffer,
-                {
-                    type:"array"
-                }
-            );
-
-        workbook.SheetNames.forEach(sheetName=>{
-
-            const sheet =
-                workbook
-                    .Sheets[sheetName];
-
-            const rows =
-                XLSX.utils.sheet_to_json(
-                    sheet,
-                    {
-                        header:1,
-                        defval:""
-                    }
-                );
-
-            if(rows.length === 0){
-
-                return;
-
-            }
-
-            const headers =
-                rows[0].map(
-                    (h,i)=>
-                        String(h || `Column ${i+1}`)
-                            .trim()
-                );
-
-            const data =
-                rows
-                    .slice(1)
-                    .filter(row =>
-                        row.some(
-                            cell =>
-                                String(cell ?? "").trim() !== ""
-                        )
-                    );
-
-            results.push({
-                file:file.name,
-                sheet:sheetName,
-                headers,
-                rows:data
-            });
-
-        });
-
-    }
-
-    return results;
-
+    if(data.length)results.push({file:file.name,sheet:sheetName,headers,data});
+   }
+  }catch(error){
+   log(`Could not read ${file.name}: ${error.message}`,"error");
+  }
+ }
+ return results;
 }
 
+function initializeWorkingData(){
+ if(EasyFlow.sources.length){
+  const first=EasyFlow.sources[0];
+  EasyFlow.headers=[...first.headers];
+  EasyFlow.data=first.data.map(r=>[...r]);
+  EasyFlow.originalRows=EasyFlow.data.length;
 
-/* =========================================================
-   OPERATIONS
-========================================================= */
-
-function runOperation(operation){
-
-    switch(operation.key){
-
-        case "duplicates":
-            removeDuplicates();
-            break;
-
-        case "clean":
-            cleanData();
-            break;
-
-        case "names":
-            standardizeNames();
-            break;
-
-        case "phones":
-            standardizePhones();
-            break;
-
-        case "emails":
-            standardizeEmails();
-            break;
-
-        case "sort":
-            sortData();
-            break;
-
-        case "summary":
-            break;
-
-        case "format":
-            cleanData();
-            break;
-
-        case "missing":
-            break;
-
-        case "quality":
-            qualityCheck();
-            break;
-
-        case "general":
-            cleanData();
-            break;
-
-    }
-
+  if(EasyFlow.sources.length>1){
+   const compatible=EasyFlow.sources.slice(1).filter(src=>src.headers.length===EasyFlow.headers.length);
+   compatible.forEach(src=>EasyFlow.data.push(...src.data.map(r=>[...r])));
+   if(compatible.length)log(`Merged ${compatible.length} additional compatible worksheet source(s) into the working dataset.`,"success");
+   EasyFlow.originalRows=EasyFlow.data.length;
+  }
+ }else{
+  EasyFlow.headers=["Task","Status","Notes"];
+  EasyFlow.data=[[EasyFlow.task,"Completed by EasyFlow","No source spreadsheet was supplied; review the requested deliverable before sending."]];
+  EasyFlow.originalRows=1;
+ }
+ log(`Working dataset contains ${EasyFlow.originalRows} row(s).`);
 }
 
-
-/* =========================================================
-   CLEAN DATA
-========================================================= */
+function runOperation(op){
+ switch(op.key){
+  case"duplicates":removeDuplicates();break;
+  case"clean":cleanData();break;
+  case"names":standardizeNames();break;
+  case"phones":standardizePhones();break;
+  case"emails":standardizeEmails();break;
+  case"sort":sortData();break;
+  case"summary":break;
+  case"format":cleanData();break;
+  case"missing":break;
+  case"general":cleanData();break;
+ }
+}
 
 function cleanData(){
-
-    EasyFlow.data =
-        EasyFlow.data.map(row=>{
-
-            return row.map(cell=>{
-
-                if(cell === null || cell === undefined){
-
-                    return "";
-
-                }
-
-                return String(cell)
-                    .replace(/\s+/g," ")
-                    .trim();
-
-            });
-
-        });
-
+ EasyFlow.data=EasyFlow.data.map(row=>row.map(cell=>{
+  if(cell===null||cell===undefined)return"";
+  if(typeof cell==="number"||cell instanceof Date)return cell;
+  return String(cell).replace(/\s+/g," ").trim();
+ })).filter(row=>row.some(v=>String(v??"").trim()!==""));
 }
-
-
-/* =========================================================
-   DUPLICATES
-========================================================= */
 
 function removeDuplicates(){
-
-    const seen =
-        new Set();
-
-    const cleaned = [];
-
-    let removed = 0;
-
-    EasyFlow.data.forEach(row=>{
-
-        const key =
-            row
-                .map(value =>
-                    String(value)
-                        .trim()
-                        .toLowerCase()
-                )
-                .join("|");
-
-        if(seen.has(key)){
-
-            removed++;
-
-            return;
-
-        }
-
-        seen.add(key);
-
-        cleaned.push(row);
-
-    });
-
-    EasyFlow.data =
-        cleaned;
-
-    EasyFlow.duplicatesRemoved +=
-        removed;
-
+ const seen=new Set(),cleaned=[];
+ let removed=0;
+ EasyFlow.data.forEach(row=>{
+  const key=row.map(v=>normalizeKey(v)).join("|");
+  if(seen.has(key)){removed++;return}
+  seen.add(key);cleaned.push(row);
+ });
+ EasyFlow.data=cleaned;
+ EasyFlow.duplicatesRemoved+=removed;
 }
 
-
-/* =========================================================
-   NAMES
-========================================================= */
+function normalizeKey(value){
+ return String(value??"").trim().toLowerCase().replace(/\s+/g," ");
+}
 
 function standardizeNames(){
-
-    EasyFlow.data =
-        EasyFlow.data.map(row=>{
-
-            return row.map((cell,index)=>{
-
-                const header =
-                    String(
-                        EasyFlow.headers[index] || ""
-                    ).toLowerCase();
-
-                if(
-                    /name|customer|client|employee|person/.test(header)
-                ){
-
-                    return titleCase(cell);
-
-                }
-
-                return cell;
-
-            });
-
-        });
-
+ EasyFlow.data=EasyFlow.data.map(row=>row.map((cell,index)=>{
+  const h=String(EasyFlow.headers[index]||"").toLowerCase();
+  if(/name|customer|client|employee|person|pangalan/.test(h))return titleCase(cell);
+  return cell;
+ }));
 }
-
 
 function titleCase(value){
-
-    return String(value)
-        .toLowerCase()
-        .replace(/\b\w/g,
-            letter =>
-                letter.toUpperCase()
-        );
-
+ return String(value??"").toLowerCase().replace(/\b[\p{L}]/gu,m=>m.toUpperCase());
 }
-
-
-/* =========================================================
-   PHONE NUMBERS
-========================================================= */
 
 function standardizePhones(){
-
-    EasyFlow.data =
-        EasyFlow.data.map(row=>{
-
-            return row.map((cell,index)=>{
-
-                const header =
-                    String(
-                        EasyFlow.headers[index] || ""
-                    ).toLowerCase();
-
-                if(
-                    /phone|mobile|telephone|contact/.test(header)
-                ){
-
-                    return normalizePhone(cell);
-
-                }
-
-                return cell;
-
-            });
-
-        });
-
+ EasyFlow.data=EasyFlow.data.map(row=>row.map((cell,index)=>{
+  const h=String(EasyFlow.headers[index]||"").toLowerCase();
+  if(/phone|mobile|telephone|contact number|phone number/.test(h))return normalizePhone(cell);
+  return cell;
+ }));
 }
-
 
 function normalizePhone(value){
-
-    let phone =
-        String(value)
-            .trim();
-
-    phone =
-        phone.replace(/[^\d+]/g,"");
-
-    if(
-        phone.startsWith("09") &&
-        phone.length === 11
-    ){
-
-        phone =
-            "+63" +
-            phone.substring(1);
-
-    }
-
-    if(
-        phone.startsWith("63") &&
-        !phone.startsWith("+")
-    ){
-
-        phone =
-            "+" + phone;
-
-    }
-
-    return phone;
-
+ let phone=String(value??"").trim().replace(/[^\d+]/g,"");
+ if(phone.startsWith("09")&&phone.length===11)phone="+63"+phone.substring(1);
+ if(phone.startsWith("63")&&!phone.startsWith("+"))phone="+"+phone;
+ return phone;
 }
-
-
-/* =========================================================
-   EMAIL
-========================================================= */
 
 function standardizeEmails(){
-
-    EasyFlow.data =
-        EasyFlow.data.map(row=>{
-
-            return row.map((cell,index)=>{
-
-                const header =
-                    String(
-                        EasyFlow.headers[index] || ""
-                    ).toLowerCase();
-
-                if(
-                    /email|e-mail/.test(header)
-                ){
-
-                    return String(cell)
-                        .trim()
-                        .toLowerCase();
-
-                }
-
-                return cell;
-
-            });
-
-        });
-
+ EasyFlow.data=EasyFlow.data.map(row=>row.map((cell,index)=>{
+  const h=String(EasyFlow.headers[index]||"").toLowerCase();
+  if(/email|e-mail/.test(h))return String(cell??"").trim().toLowerCase();
+  return cell;
+ }));
 }
-
-
-/* =========================================================
-   SORT
-========================================================= */
 
 function sortData(){
-
-    if(
-        EasyFlow.data.length < 2
-    ){
-
-        return;
-
-    }
-
-    let sortIndex = 0;
-
-    const nameIndex =
-        EasyFlow.headers.findIndex(
-            header =>
-                /name|customer|client|employee/.test(
-                    String(header).toLowerCase()
-                )
-        );
-
-    if(nameIndex >= 0){
-
-        sortIndex = nameIndex;
-
-    }
-
-    EasyFlow.data.sort(
-        (a,b)=>{
-
-            return String(a[sortIndex] || "")
-                .localeCompare(
-                    String(b[sortIndex] || ""),
-                    undefined,
-                    {
-                        numeric:true,
-                        sensitivity:"base"
-                    }
-                );
-
-        }
-    );
-
+ if(EasyFlow.data.length<2)return;
+ let index=EasyFlow.headers.findIndex(h=>/name|customer|client|employee|person/.test(String(h).toLowerCase()));
+ if(index<0)index=0;
+ EasyFlow.data.sort((a,b)=>String(a[index]??"").localeCompare(String(b[index]??""),undefined,{numeric:true,sensitivity:"base"}));
 }
-
-
-/* =========================================================
-   QUALITY CHECK
-========================================================= */
 
 function qualityCheck(){
+ let issues=0;
+ const seen=new Set();
+ let blankRows=0;
 
-    let issues = 0;
+ EasyFlow.data.forEach(row=>{
+  const key=row.map(v=>normalizeKey(v)).join("|");
+  if(seen.has(key))issues++;
+  seen.add(key);
+  if(row.every(v=>String(v??"").trim()==="")){issues++;blankRows++}
+ });
 
-    const seen =
-        new Set();
-
-    EasyFlow.data.forEach(row=>{
-
-        const key =
-            row.join("|");
-
-        if(seen.has(key)){
-
-            issues++;
-
-        }
-
-        seen.add(key);
-
-        if(
-            row.every(
-                value =>
-                    String(value).trim() === ""
-            )
-        ){
-
-            issues++;
-
-        }
-
-    });
-
-    return {
-        issues
-    };
-
+ EasyFlow.blankRowsRemoved=blankRows;
+ return{issues};
 }
 
+function countMissingCells(){
+ let count=0;
+ EasyFlow.data.forEach(row=>row.forEach(v=>{if(String(v??"").trim()==="")count++}));
+ return count;
+}
 
-/* =========================================================
-   CREATE EXCEL WORKBOOK
-========================================================= */
+function autoSizeSheet(sheet){
+ const range=XLSX.utils.decode_range(sheet["!ref"]||"A1");
+ const widths=[];
+ for(let c=range.s.c;c<=range.e.c;c++){
+  let max=10;
+  for(let r=range.s.r;r<=Math.min(range.e.r,200);r++){
+   const cell=sheet[XLSX.utils.encode_cell({r,c})];
+   const value=cell?String(cell.v??""):"";
+   max=Math.min(Math.max(max,value.length+2),45);
+  }
+  widths.push({wch:max});
+ }
+ sheet["!cols"]=widths;
+}
 
 function createWorkbook(){
+ const wb=XLSX.utils.book_new();
 
-    const workbook =
-        XLSX.utils.book_new();
+ const dataSheet=XLSX.utils.aoa_to_sheet([EasyFlow.headers,...EasyFlow.data]);
+ autoSizeSheet(dataSheet);
+ XLSX.utils.book_append_sheet(wb,dataSheet,"Processed Data");
 
+ const summary=[
+  ["Excel EasyFlow — Work Summary"],
+  [],
+  ["Client Task",EasyFlow.task],
+  ["Generated",new Date().toLocaleString()],
+  ["Source Files",EasyFlow.files.map(f=>f.name).join(", ")||"None"],
+  [],
+  ["Original Rows",EasyFlow.originalRows],
+  ["Final Rows",EasyFlow.data.length],
+  ["Duplicates Removed",EasyFlow.duplicatesRemoved],
+  ["Blank Rows Remaining",countBlankRows()],
+  ["Missing Cells",countMissingCells()],
+  ["Quality Issues",EasyFlow.qualityIssues],
+  [],
+  ["Workflow"],
+  ...EasyFlow.plan.map((s,i)=>[`${i+1}. ${s.title}`,s.description])
+ ];
+ const summarySheet=XLSX.utils.aoa_to_sheet(summary);
+ autoSizeSheet(summarySheet);
+ XLSX.utils.book_append_sheet(wb,summarySheet,"EasyFlow Summary");
 
-    /*
-       MAIN DATA SHEET
-    */
+ const quality=[
+  ["Quality Check","Result"],
+  ["Duplicate records remaining",hasDuplicateRows()?"CHECK":"PASS"],
+  ["Blank rows remaining",countBlankRows()],
+  ["Missing cells",countMissingCells()],
+  ["Rows processed",EasyFlow.data.length],
+  ["Workbook generated","PASS"],
+  ["Freelancer final review","REQUIRED BEFORE CLIENT DELIVERY"]
+ ];
+ const qualitySheet=XLSX.utils.aoa_to_sheet(quality);
+ autoSizeSheet(qualitySheet);
+ XLSX.utils.book_append_sheet(wb,qualitySheet,"Quality Check");
 
-    const dataWithHeaders = [
-        EasyFlow.headers,
-        ...EasyFlow.data
-    ];
-
-    const dataSheet =
-        XLSX.utils.aoa_to_sheet(
-            dataWithHeaders
-        );
-
-    XLSX.utils.book_append_sheet(
-        workbook,
-        dataSheet,
-        "Processed Data"
-    );
-
-
-    /*
-       SUMMARY
-    */
-
-    const summary = [
-
-        ["Excel EasyFlow — Work Summary"],
-
-        [],
-
-        ["Client Task",EasyFlow.task],
-
-        [],
-
-        ["Original Rows",EasyFlow.originalRows],
-
-        ["Final Rows",EasyFlow.data.length],
-
-        [
-            "Duplicates Removed",
-            EasyFlow.duplicatesRemoved
-        ],
-
-        [
-            "Quality Issues",
-            EasyFlow.qualityIssues
-        ],
-
-        [],
-
-        ["Workflow"],
-
-        ...EasyFlow.plan.map(
-            (step,index)=>[
-                `${index+1}. ${step.title}`,
-                step.description
-            ]
-        )
-
-    ];
-
-    const summarySheet =
-        XLSX.utils.aoa_to_sheet(
-            summary
-        );
-
-    XLSX.utils.book_append_sheet(
-        workbook,
-        summarySheet,
-        "EasyFlow Summary"
-    );
-
-
-    /*
-       QUALITY SHEET
-    */
-
-    const qualitySheetData = [
-
-        ["Quality Check","Result"],
-
-        [
-            "Duplicate records remaining",
-            EasyFlow.qualityIssues === 0
-                ? "PASS"
-                : "CHECK"
-        ],
-
-        [
-            "Rows processed",
-            EasyFlow.data.length
-        ],
-
-        [
-            "Blank rows",
-            countBlankRows()
-        ],
-
-        [
-            "Workbook generated",
-            "PASS"
-        ]
-
-    ];
-
-    const qualitySheet =
-        XLSX.utils.aoa_to_sheet(
-            qualitySheetData
-        );
-
-    XLSX.utils.book_append_sheet(
-        workbook,
-        qualitySheet,
-        "Quality Check"
-    );
-
-
-    EasyFlow.resultWorkbook =
-        workbook;
-
+ EasyFlow.resultWorkbook=wb;
 }
 
+function hasDuplicateRows(){
+ const seen=new Set();
+ for(const row of EasyFlow.data){
+  const key=row.map(v=>normalizeKey(v)).join("|");
+  if(seen.has(key))return true;
+  seen.add(key);
+ }
+ return false;
+}
 
 function countBlankRows(){
-
-    return EasyFlow.data.filter(
-        row =>
-            row.every(
-                value =>
-                    String(value).trim() === ""
-            )
-    ).length;
-
+ return EasyFlow.data.filter(row=>row.every(v=>String(v??"").trim()==="")).length;
 }
-
-
-/* =========================================================
-   RESULTS
-========================================================= */
 
 function showResults(){
+ document.getElementById("resultCard").classList.remove("hidden");
+ document.getElementById("originalRows").textContent=EasyFlow.originalRows;
+ document.getElementById("finalRows").textContent=EasyFlow.data.length;
+ document.getElementById("duplicatesRemoved").textContent=EasyFlow.duplicatesRemoved;
+ document.getElementById("blankRowsRemoved").textContent=EasyFlow.blankRowsRemoved;
+ document.getElementById("qualityIssues").textContent=EasyFlow.qualityIssues;
 
-    document
-        .getElementById("resultCard")
-        .classList.remove("hidden");
+ const msg=EasyFlow.qualityIssues===0
+  ?"✓ Automated quality checks passed. The freelancer should still review the workbook before sending it to the client."
+  :`⚠ EasyFlow found ${EasyFlow.qualityIssues} quality item(s). Review the Quality Check sheet before delivery.`;
+ document.getElementById("qualityMessage").textContent=msg;
 
-    document
-        .getElementById("originalRows")
-        .textContent =
-        EasyFlow.originalRows;
-
-    document
-        .getElementById("finalRows")
-        .textContent =
-        EasyFlow.data.length;
-
-    document
-        .getElementById("duplicatesRemoved")
-        .textContent =
-        EasyFlow.duplicatesRemoved;
-
-    document
-        .getElementById("qualityIssues")
-        .textContent =
-        EasyFlow.qualityIssues;
-
-    document
-        .getElementById("qualityMessage")
-        .textContent =
-        EasyFlow.qualityIssues === 0
-            ? "✓ EasyFlow did not detect remaining duplicate or blank records in the processed data."
-            : "⚠ EasyFlow detected items that may require a freelancer review.";
-
-    window.scrollTo({
-        top:
-            document
-                .getElementById("resultCard")
-                .offsetTop - 20,
-        behavior:"smooth"
-    });
-
+ window.scrollTo({top:document.getElementById("resultCard").offsetTop-20,behavior:"smooth"});
 }
-
-
-/* =========================================================
-   DOWNLOAD
-========================================================= */
 
 function downloadResult(){
-
-    if(!EasyFlow.resultWorkbook){
-
-        alert(
-            "Please run EasyFlow first."
-        );
-
-        return;
-
-    }
-
-    const today =
-        new Date()
-            .toISOString()
-            .slice(0,10);
-
-    const filename =
-        `EasyFlow_Client_Ready_${today}.xlsx`;
-
-    XLSX.writeFile(
-        EasyFlow.resultWorkbook,
-        filename
-    );
-
+ if(!EasyFlow.resultWorkbook){alert("Please run EasyFlow first.");return}
+ const date=new Date().toISOString().slice(0,10);
+ XLSX.writeFile(EasyFlow.resultWorkbook,`EasyFlow_Client_Ready_${date}.xlsx`);
 }
-
-
-/* =========================================================
-   WORK LOG
-========================================================= */
 
 function log(message,type=""){
-
-    const container =
-        document.getElementById("workLog");
-
-    const line =
-        document.createElement("div");
-
-    line.className =
-        "log-line " +
-        (
-            type === "success"
-                ? "log-success"
-                : type === "warning"
-                    ? "log-warning"
-                    : type === "error"
-                        ? "log-error"
-                        : ""
-        );
-
-    line.textContent =
-        `[${new Date().toLocaleTimeString()}] ${message}`;
-
-    container.appendChild(line);
-
-    container.scrollTop =
-        container.scrollHeight;
-
+ const line=document.createElement("div");
+ line.className="log-line "+(type==="success"?"log-success":type==="warning"?"log-warning":type==="error"?"log-error":"");
+ line.textContent=`[${new Date().toLocaleTimeString()}] ${message}`;
+ const box=document.getElementById("workLog");
+ box.appendChild(line);
+ box.scrollTop=box.scrollHeight;
 }
 
-
-function clearLog(){
-
-    document
-        .getElementById("workLog")
-        .innerHTML = "";
-
-}
-
-
+function clearLog(){document.getElementById("workLog").innerHTML=""}
 function setProgress(value,text){
-
-    document
-        .getElementById("progressBar")
-        .style.width =
-        value + "%";
-
-    document
-        .getElementById("progressText")
-        .textContent =
-        text;
-
+ document.getElementById("progressBar").style.width=Math.max(0,Math.min(100,value))+"%";
+ document.getElementById("progressText").textContent=text;
 }
-
-
-function wait(ms){
-
-    return new Promise(
-        resolve =>
-            setTimeout(resolve,ms)
-    );
-
-}
-
-
-/* =========================================================
-   DEMO
-========================================================= */
+function wait(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
 
 function loadDemo(){
+ document.getElementById("taskInput").value=`Please clean this customer list.
 
-    document
-        .getElementById("taskInput")
-        .value =
-`Please clean this customer list.
-
-Remove duplicate customers, clean and standardize
-the customer names, normalize phone numbers and emails,
-sort the list by customer name, and prepare the final
-Excel file for the client.`;
-
-    analyzeTask();
-
+Remove duplicate customers, standardize the customer names,
+normalize phone numbers and emails, sort the list by customer
+name, and prepare the final Excel file for the client.`;
+ analyzeTask();
 }
-
-
-/* =========================================================
-   RESET
-========================================================= */
 
 function resetEasyFlow(){
-
-    EasyFlow.task = "";
-    EasyFlow.files = [];
-    EasyFlow.plan = [];
-    EasyFlow.data = [];
-    EasyFlow.headers = [];
-    EasyFlow.detectedOperations = [];
-    EasyFlow.resultWorkbook = null;
-    EasyFlow.originalRows = 0;
-    EasyFlow.finalRows = 0;
-    EasyFlow.duplicatesRemoved = 0;
-    EasyFlow.qualityIssues = 0;
-
-    document
-        .getElementById("taskInput")
-        .value = "";
-
-    document
-        .getElementById("fileInput")
-        .value = "";
-
-    document
-        .getElementById("fileList")
-        .innerHTML = "";
-
-    document
-        .getElementById("understandingCard")
-        .classList.add("hidden");
-
-    document
-        .getElementById("planCard")
-        .classList.add("hidden");
-
-    document
-        .getElementById("resultCard")
-        .classList.add("hidden");
-
-    document
-        .getElementById("logCard")
-        .classList.add("hidden");
-
-    document
-        .getElementById("statusCard")
-        .classList.remove("active");
-
-    document
-        .getElementById("workLog")
-        .innerHTML = "";
-
-    setProgress(
-        0,
-        "Waiting for a task..."
-    );
-
-    window.scrollTo({
-        top:0,
-        behavior:"smooth"
-    });
-
+ if(EasyFlow.running)return;
+ Object.assign(EasyFlow,{task:"",files:[],sources:[],plan:[],data:[],headers:[],originalRows:0,finalRows:0,duplicatesRemoved:0,blankRowsRemoved:0,qualityIssues:0,resultWorkbook:null,detectedOperations:[]});
+ document.getElementById("taskInput").value="";
+ document.getElementById("fileInput").value="";
+ document.getElementById("fileList").innerHTML="";
+ ["understandingCard","planCard","resultCard","logCard"].forEach(id=>document.getElementById(id).classList.add("hidden"));
+ document.getElementById("statusCard").classList.remove("active");
+ document.getElementById("workLog").innerHTML="";
+ document.getElementById("statusBadge").textContent="Working";
+ setProgress(0,"Waiting for a client task...");
+ window.scrollTo({top:0,behavior:"smooth"});
 }
 
-
-/* =========================================================
-   STARTUP
-========================================================= */
-
-setProgress(
-    0,
-    "Waiting for a client task..."
-);
-
+setProgress(0,"Waiting for a client task...");
 </script>
-
 </body>
 </html>
