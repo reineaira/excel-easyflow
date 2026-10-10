@@ -95,6 +95,7 @@ function runWork(){
     const first=result.output[0];
     $('preview').innerHTML=tableHtml(first.headers,first.rows);
     workbookOutput=XLSX.utils.book_new();
+    const ops=new Set((plan?.operations||[]).map(o=>o.key));
     const summaryRows=[];
     result.output.forEach((sheet,i)=>{
       const original=XLSX.utils.json_to_sheet(sheet.originalRows,{header:sheet.headers});
@@ -124,7 +125,7 @@ function runWork(){
     XLSX.utils.book_append_sheet(workbookOutput,XLSX.utils.json_to_sheet(summaryRows),uniqueSheetName(workbookOutput,'Summary'));
     workbookOutput.SheetNames.forEach(name=>applySheetLayout(workbookOutput.Sheets[name]));
     $('resultsCard').scrollIntoView({behavior:'smooth',block:'start'});
-  }catch(e){notice('runNotice','Could not process the workbook: '+e.message,'bad')}
+  }catch(e){result=null;workbookOutput=null;$('resultsCard').classList.add('hidden');notice('runNotice','Could not process the workbook: '+e.message,'bad')}
 }
 function uniqueSheetName(wb,name){let n=name.slice(0,31),i=2;while(wb.SheetNames.includes(n)){n=(name.slice(0,26)+' '+i++).slice(0,31)}return n}
 function downloadXlsx(){if(!workbookOutput){setStatus('Run EasyFlow first to create the Excel output.','warn');return}try{XLSX.writeFile(workbookOutput,'EasyFlow_Client_Ready.xlsx')}catch(e){setStatus('Could not create the Excel download: '+e.message,'bad')}}
