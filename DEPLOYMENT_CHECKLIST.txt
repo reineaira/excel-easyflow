@@ -1,0 +1,31 @@
+EXCEL EASYFLOW DEPLOYMENT CHECKLIST
+
+Before editing
+[ ] Back up the current GitHub index.html.
+[ ] Back up the current Cloudflare Worker code.
+[ ] Never place secrets in GitHub/frontend code.
+
+Cloudflare
+[ ] Confirm OPENAI_API_KEY exists as a secret.
+[ ] Keep a working OPENAI_MODEL variable unchanged.
+[ ] Review and deploy worker.js.
+[ ] Test /api/health and confirm status online.
+[ ] Add Cloudflare rate limiting/WAF before public promotion.
+
+GitHub Pages
+[ ] Replace index.html only after making a backup.
+[ ] Commit changes and wait for Pages deployment.
+[ ] Open https://reineaira.github.io/excel-easyflow/
+[ ] Test Try Demo Task, then Run Workflow.
+[ ] Test a non-sensitive Excel file and CSV file.
+[ ] Check workbook sheets and CSV content.
+[ ] Confirm the original uploaded file remains unchanged.
+[ ] Test on mobile.
+
+Known limitations
+- Duplicate detection finds exact matching rows only.
+- Missing values are reported, not guessed.
+- Phone cleanup changes spacing/punctuation only; it does not verify phone numbers.
+- CSV download contains the first dataset only; workbook contains all processed sheets.
+- AI planning sends task instructions and limited spreadsheet metadata/sample rows to the Worker.
+- Do not call the live service production-ready until deployment and tests pass.
