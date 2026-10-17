@@ -19,6 +19,53 @@
 <section id="planCard" class="card hidden"><h2>🧠 EasyFlow understood the job</h2><div class="grid"><div class="stat"><span class="small">Files selected</span><b id="fileCount">0</b></div><div class="stat"><span class="small">Data sources</span><b id="sourceCount">0</b></div><div class="stat"><span class="small">Operations</span><b id="opCount">0</b></div><div class="stat"><span class="small">Planning source</span><b id="planSource" style="font-size:17px">—</b></div></div><p id="summary"></p><div id="operations"></div><h3>Work Plan</h3><ol id="workPlan" class="steps"></ol><div id="qualityChecks"></div><div id="runNotice" class="notice hidden"></div><div class="buttons"><button class="primary" id="run">▶ Run EasyFlow</button></div></section>
 <section id="resultsCard" class="card hidden"><h2>📦 Results & Quality Checks</h2><div id="resultStats" class="grid"></div><div id="resultNotice" class="notice"></div><h3>Preview of cleaned data</h3><div class="tablewrap"><table id="preview"></table></div><div class="buttons" style="margin-top:14px"><button class="primary" id="download">⬇ Download client-ready Excel</button><button class="secondary" id="downloadCsv">Download cleaned CSV</button></div><p class="hint">Review the output before sending it to your client. EasyFlow preserves the source data in the exported workbook and puts the cleaned results in a separate sheet.</p></section>
 <section class="card"><h2>⚡ What EasyFlow can do</h2><div class="grid"><div><h3>🧠 Understand</h3><p>Turn client instructions into a practical work plan.</p></div><div><h3>🛠️ Work</h3><p>Clean spreadsheet data, remove duplicates, standardize selected fields, and export results.</p></div><div><h3>🔍 Check</h3><p>Report duplicate rows and missing values for final human review.</p></div></div><p class="hint">AI planning runs through a secure Cloudflare Worker. Spreadsheet processing runs locally in your browser. The private AI key must never be placed in this GitHub Pages file.</p></section>
+
+<section class="card" id="communityFeedback">
+  <h2>⭐ EasyFlow Community Feedback</h2>
+  <p class="hint">Nasubukan mo ba ang EasyFlow? Ibahagi ang iyong karanasan upang makatulong sa ibang freelancers.</p>
+
+  <form id="feedbackForm">
+    <div class="field">
+      <label for="feedbackName">Your name (optional)</label>
+      <input id="feedbackName" type="text" maxlength="60" placeholder="Your name">
+    </div>
+
+    <div class="field">
+      <label for="feedbackRating">Your rating</label>
+      <select id="feedbackRating" required>
+        <option value="">Choose a rating</option>
+        <option value="5">★★★★★ — Excellent</option>
+        <option value="4">★★★★ — Very good</option>
+        <option value="3">★★★ — Good</option>
+        <option value="2">★★ — Needs improvement</option>
+        <option value="1">★ — Poor</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label for="feedbackComment">Your feedback</label>
+      <textarea id="feedbackComment" minlength="10" maxlength="800" required placeholder="What did you like, and what can we improve?"></textarea>
+    </div>
+
+    <div class="hidden" aria-hidden="true">
+      <label for="feedbackWebsite">Leave this field empty</label>
+      <input id="feedbackWebsite" type="text" tabindex="-1" autocomplete="off">
+    </div>
+
+    <div class="buttons">
+      <button class="primary" id="feedbackSubmit" type="submit">Submit Feedback</button>
+      <button class="secondary" id="feedbackRefresh" type="button">Refresh Reviews</button>
+    </div>
+  </form>
+
+  <div id="feedbackMessage" class="notice hidden" role="status" aria-live="polite"></div>
+
+  <h3>What freelancers are saying</h3>
+  <div id="feedbackReviews" aria-live="polite">
+    <p class="hint">Loading community feedback…</p>
+  </div>
+</section>
+
 <footer>Excel EasyFlow • Built for freelancers • Final review by the freelancer is recommended</footer>
 </main>
 <script>
@@ -119,5 +166,105 @@ function uniqueSheetName(wb,name){let n=name.slice(0,31),i=2;while(wb.SheetNames
 function downloadXlsx(){if(!workbookOutput){setStatus('Run EasyFlow first to create the Excel output.','warn');return}try{XLSX.writeFile(workbookOutput,'EasyFlow_Client_Ready.xlsx')}catch(e){setStatus('Could not create the Excel download: '+e.message,'bad')}}
 function downloadCsv(){if(!result?.output?.length){setStatus('Run EasyFlow first to create the CSV output.','warn');return}try{const s=result.output[0],ws=XLSX.utils.json_to_sheet(exportRows(s.headers,s.rows,true),{header:s.headers});const csv='\ufeff'+XLSX.utils.sheet_to_csv(ws);const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));const a=document.createElement('a');a.href=url;a.download='EasyFlow_Cleaned_Data.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)}catch(e){setStatus('Could not create the CSV download: '+e.message,'bad')}}
 $('files').addEventListener('change',()=>{$('fileList').innerHTML=[...$('files').files].map(f=>`<li>${esc(f.name)} (${Math.round(f.size/1024)} KB)</li>`).join('');sources=[];plan=null;result=null;workbookOutput=null;$('planCard').classList.add('hidden');$('resultsCard').classList.add('hidden')});$('analyze').addEventListener('click',analyze);$('run').addEventListener('click',runWork);$('download').addEventListener('click',downloadXlsx);$('downloadCsv').addEventListener('click',downloadCsv);$('demo').addEventListener('click',()=>{$('task').value='Clean the customer list, remove duplicate records, standardize names, check email values, and report missing phone, email, or city.';const demo=[['Name','Phone','Email','City'],['Maria Santos','09171234567','maria@example.com','Manila'],['Maria Santos','09171234567','maria@example.com','Manila'],['juan dela cruz','09181234567','','Caloocan'],['ANA REYES','','ana@example.com','Quezon City'],['Pedro  Cruz','09201234567','pedro@example.com',''],['Liza Garcia','09301234567','','Pasig']];const ws=XLSX.utils.aoa_to_sheet(demo);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Customers');const bytes=XLSX.write(wb,{bookType:'xlsx',type:'array'});const file=new File([bytes],'EasyFlow_Demo_Customers.xlsx',{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});const dt=new DataTransfer();dt.items.add(file);$('files').files=dt.files;$('fileList').innerHTML='<li>EasyFlow_Demo_Customers.xlsx (built-in demo)</li>';analyze()});$('reset').addEventListener('click',()=>{ $('task').value='';$('files').value='';$('fileList').innerHTML='';$('status').classList.add('hidden');$('planCard').classList.add('hidden');$('resultsCard').classList.add('hidden');sources=[];plan=null;result=null;workbookOutput=null});
+
+const FEEDBACK_API_URL = 'https://easyflow-feedback.grettabaliw.workers.dev';
+
+function feedbackShowMessage(message, type = '') {
+  const box = document.getElementById('feedbackMessage');
+  box.textContent = message;
+  box.className = 'notice';
+  if (type === 'ok') box.classList.add('ok');
+  if (type === 'bad') box.classList.add('bad');
+}
+
+function feedbackEscape(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[char]);
+}
+
+function feedbackDate(value) {
+  if (!value) return '';
+  const date = new Date(String(value).replace(' ', 'T') + 'Z');
+  return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString();
+}
+
+async function loadPublicFeedback() {
+  const box = document.getElementById('feedbackReviews');
+  box.textContent = 'Loading reviews…';
+
+  try {
+    const response = await fetch(FEEDBACK_API_URL + '/api/feedback');
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || 'Unable to load reviews.');
+    }
+
+    const reviews = Array.isArray(data.reviews) ? data.reviews : [];
+
+    if (!reviews.length) {
+      box.innerHTML = '<p class="hint">No reviews yet. Be the first to share feedback!</p>';
+      return;
+    }
+
+    box.innerHTML = reviews.map(review => {
+      const rating = Math.max(1, Math.min(5, Number(review.rating) || 1));
+      return `
+        <article class="card">
+          <div style="color:#f5c76b;font-size:18px" aria-label="${rating} out of 5 stars">${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}</div>
+          <strong>${feedbackEscape(review.display_name || 'EasyFlow user')}</strong>
+          <p>${feedbackEscape(review.comment || '')}</p>
+          <small class="hint">${feedbackEscape(feedbackDate(review.created_at))}</small>
+        </article>
+      `;
+    }).join('');
+  } catch (error) {
+    box.innerHTML = '<p class="hint">Could not load reviews. Please try Refresh Reviews.</p>';
+  }
+}
+
+document.getElementById('feedbackForm').addEventListener('submit', async event => {
+  event.preventDefault();
+
+  const form = event.currentTarget;
+  const button = document.getElementById('feedbackSubmit');
+  button.disabled = true;
+
+  try {
+    const response = await fetch(FEEDBACK_API_URL + '/api/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: document.getElementById('feedbackName').value.trim(),
+        rating: Number(document.getElementById('feedbackRating').value),
+        comment: document.getElementById('feedbackComment').value.trim(),
+        website: document.getElementById('feedbackWebsite').value
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || 'Could not submit feedback.');
+    }
+
+    feedbackShowMessage('Thank you! Your feedback has been submitted.', 'ok');
+    form.reset();
+    await loadPublicFeedback();
+  } catch (error) {
+    feedbackShowMessage(error.message || 'Could not submit feedback. Please try again.', 'bad');
+  } finally {
+    button.disabled = false;
+  }
+});
+
+document.getElementById('feedbackRefresh').addEventListener('click', loadPublicFeedback);
+loadPublicFeedback();
+
 </script>
 </body></html>
