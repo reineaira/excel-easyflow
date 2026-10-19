@@ -266,5 +266,38 @@ document.getElementById('feedbackForm').addEventListener('submit', async event =
 document.getElementById('feedbackRefresh').addEventListener('click', loadPublicFeedback);
 loadPublicFeedback();
 
+
+const copyClientReportButton = document.createElement('button');
+copyClientReportButton.type = 'button';
+copyClientReportButton.textContent = '📋 Copy Client Report';
+copyClientReportButton.className = 'secondary';
+copyClientReportButton.style.marginTop = '10px';
+
+const resultsCardElement = document.getElementById('resultsCard');
+
+if (resultsCardElement) {
+  resultsCardElement.appendChild(copyClientReportButton);
+
+  copyClientReportButton.addEventListener('click', async () => {
+    const taskText = document.getElementById('task')?.value?.trim() || 'Spreadsheet task';
+    const report = [
+      'EXCEL EASYFLOW — CLIENT WORK REPORT',
+      '',
+      'Task: ' + taskText,
+      'Files uploaded: ' + (Array.isArray(sources) ? sources.length : 0),
+      'Status: Please review the processed spreadsheet output before final delivery.',
+      '',
+      'Prepared with Excel EasyFlow — Your Freelancer Work Buddy.'
+    ].join('\n');
+
+    try {
+      await navigator.clipboard.writeText(report);
+      copyClientReportButton.textContent = '✅ Report Copied!';
+    } catch (error) {
+      window.prompt('Copy your client report:', report);
+    }
+  });
+}
+
 </script>
 </body></html>
