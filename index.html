@@ -269,6 +269,7 @@ loadPublicFeedback();
 
 const copyClientReportButton = document.createElement('button');
 copyClientReportButton.type = 'button';
+copyClientReportButton.id = 'copyClientReportButton';
 copyClientReportButton.textContent = '📋 Copy Client Report';
 copyClientReportButton.className = 'secondary';
 copyClientReportButton.style.marginTop = '10px';
@@ -279,13 +280,29 @@ if (resultsCardElement) {
   resultsCardElement.appendChild(copyClientReportButton);
 
   copyClientReportButton.addEventListener('click', async () => {
-    const taskText = document.getElementById('task')?.value?.trim() || 'Spreadsheet task';
+    if (!result || !result.stats) {
+      alert('Please run EasyFlow first to create your client report.');
+      return;
+    }
+
+    const totals = result.stats;
+    const taskText =
+      document.getElementById('task')?.value?.trim() ||
+      'Spreadsheet task';
+
     const report = [
       'EXCEL EASYFLOW — CLIENT WORK REPORT',
       '',
       'Task: ' + taskText,
-      'Files uploaded: ' + (Array.isArray(sources) ? sources.length : 0),
-      'Status: Please review the processed spreadsheet output before final delivery.',
+      'Files processed: ' + totals.files,
+      'Sheets processed: ' + totals.sheets,
+      'Input rows: ' + totals.inputRows,
+      'Output rows: ' + totals.outputRows,
+      'Duplicates removed: ' + totals.duplicatesRemoved,
+      'Missing cells found: ' + totals.missingCells,
+      'Invalid email values found: ' + totals.invalidEmails,
+      '',
+      'Please review the processed workbook before final delivery.',
       '',
       'Prepared with Excel EasyFlow — Your Freelancer Work Buddy.'
     ].join('\n');
