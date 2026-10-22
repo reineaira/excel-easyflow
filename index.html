@@ -290,22 +290,30 @@ if (resultsCardElement) {
       document.getElementById('task')?.value?.trim() ||
       'Spreadsheet task';
 
-    const report = [
-      'EXCEL EASYFLOW — CLIENT WORK REPORT',
-      '',
-      'Task: ' + taskText,
-      'Files processed: ' + totals.files,
-      'Sheets processed: ' + totals.sheets,
-      'Input rows: ' + totals.inputRows,
-      'Output rows: ' + totals.outputRows,
-      'Duplicates removed: ' + totals.duplicatesRemoved,
-      'Missing cells found: ' + totals.missingCells,
-      'Invalid email values found: ' + totals.invalidEmails,
-      '',
-      'Please review the processed workbook before final delivery.',
-      '',
-      'Prepared with Excel EasyFlow — Your Freelancer Work Buddy.'
-    ].join('\n');
+    
+const report = [
+  'EXCEL EASYFLOW — CLIENT WORK REPORT',
+  '',
+  'Task: ' + taskText,
+  'Files processed: ' + totals.files,
+  'Sheets processed: ' + totals.sheets,
+  'Input rows: ' + totals.inputRows,
+  'Output rows: ' + totals.outputRows,
+  'Duplicates removed: ' + totals.duplicatesRemoved,
+  'Missing cells found: ' + totals.missingCells,
+  'Rows with missing values: ' +
+    result.output.reduce(
+      (count, sheet) => count + sheet.missing.length,
+      0
+    ),
+  'Names standardized: ' + totals.standardizedNames,
+  'Invalid email values found: ' + totals.invalidEmails,
+  '',
+  'Please review the processed workbook before final delivery.',
+  '',
+  'Prepared with Excel EasyFlow — Your Freelancer Work Buddy.'
+].join('\n');
+
 
     try {
       await navigator.clipboard.writeText(report);
