@@ -105,7 +105,150 @@ function findColumn(headers,pattern){return headers.find(h=>pattern.test(h))}
 function findNameColumns(headers){return headers.filter(h=>/^(name|full.?name|customer.?name|contact.?name|pangalan|first.?name|given.?name|last.?name|surname|family.?name)$/i.test(h.trim().replace(/[_-]+/g,' '))||/^(first|given|last|family|sur)\s*name$/i.test(h.trim()))}
 function exportRows(headers,rows,safeForCsv=false){return rows.map(r=>Object.fromEntries(headers.map(h=>[h,safeForCsv?spreadsheetSafeValue(r[h]):String(r[h]??'')])))}
 function spreadsheetSafeValue(value){const s=String(value??'');return /^[\s]*[=+@\-]/.test(s)?"'"+s:s}
-function processSources(){if(!sources.length)throw new Error('Upload at least one Excel or CSV file first.');const ops=new Set((plan?.operations||[]).map(o=>o.key));const output=[],stats={inputRows:0,outputRows:0,duplicatesRemoved:0,missingCells:0,standardizedNames:0,invalidEmails:0,files:new Set(sources.map(s=>s.fileName)).size,sheets:sources.length};for(const src of sources){const headers=src.headers;let rows=src.originalRows.map(r=>({...r}));stats.inputRows+=rows.length;const nameCols=findNameColumns(headers);const nameCol=nameCols[0];const phoneCol=findColumn(headers,/phone|mobile|telephone|contact.?number/i);const emailCol=findColumn(headers,/email|e-mail/i);if(ops.has('clean'))rows=rows.map(r=>{for(const h of headers)if(typeof r[h]==='string')r[h]=r[h].replace(/\s+/g,' ').trim();return r});if(ops.has('names')&&nameCols.length)rows=rows.map(r=>{for(const col of nameCols){const old=r[col]||'',v=titleCaseName(old);if(v!==old)stats.standardizedNames++;r[col]=v}return r});if(ops.has('phones')&&phoneCol)rows=rows.map(r=>{r[phoneCol]=String(r[phoneCol]||'').replace(/[\s().-]/g,'');return r});if(ops.has('emails')&&emailCol)rows=rows.map(r=>{r[emailCol]=String(r[emailCol]||'').trim().toLowerCase();return r});if(ops.has('sort'))rows.sort((a,b)=>String(a[nameCol||headers[0]]||'').localeCompare(String(b[nameCol||headers[0]]||'')));let duplicateRows=[];if(ops.has('duplicates')){const seen=new Set();rows=rows.filter((r,i)=>{const key=headers.map(h=>String(r[h]??'').trim().toLowerCase()).join('\u001f');if(seen.has(key)){duplicateRows.push({...Object.fromEntries(headers.map(h=>[h,r[h]])),_sourceRow:r._easyflowSourceRow||i+2});stats.duplicatesRemoved++;return false}seen.add(key);return true})}const missing=[];rows.forEach((r,i)=>{const cols=headers.filter(h=>String(r[h]??'').trim()==='');stats.missingCells+=cols.length;if(cols.length)missing.push({sourceRow:r._easyflowSourceRow||i+2,missingColumns:cols.join(', '),...Object.fromEntries(headers.map(h=>[h,r[h]]))})});if(emailCol)stats.invalidEmails+=rows.filter(r=>r[emailCol]&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(r[emailCol]))).length;output.push({fileName:src.fileName,sheetName:src.sheetName,headers,rows,originalRows:src.originalRows,duplicates:duplicateRows,missing})}stats.outputRows=output.reduce((n,s)=>n+s.rows.length,0);return {output,stats}}
+
+function processSources(){
+  if(!sources.length)throw new Error('Upload at least one Excel or CSV file first.');
+
+  const ops=new Set((plan?.operations||[]).map(o=>o.key));
+  const output=[];
+  const stats={
+    inputRows:0,
+    outputRows:0,
+    duplicatesRemoved:0,
+    duplicatesFound:0,
+    missingCells:0,
+    standardizedNames:0,
+    invalidEmails:0,
+    files:new Set(sources.map(s=>s.fileName)).size,
+    sheets:sources.length
+  };
+
+  for(const src of sources){
+    const headers=src.headers;
+    let rows=src.originalRows.map(r=>({...r}));
+    stats.inputRows+=rows.length;
+
+    const nameCols=findNameColumns(headers);
+    const nameCol=nameCols[0];
+    const phoneCol=findColumn(headers,/phone|mobile|telephone|contact.?number/i);
+    const emailCol=findColumn(headers,/email|e-mail/i);
+
+    if(ops.has('clean')){
+      rows=rows.map(r=>{
+        for(const h of headers){
+          if(typeof r[h]==='string')r[h]=r[h].replace(/\s+/g,' ').trim();
+        }
+        return r;
+      });
+    }
+
+    if(ops.has('names')&&nameCols.length){
+      rows=rows.map(r=>{
+        for(const col of nameCols){
+          const old=r[col]||'';
+          const v=titleCaseName(old);
+          if(v!==old)stats.standardizedNames++;
+          r[col]=v;
+        }
+        return r;
+      });
+    }
+
+    if(ops.has('phones')&&phoneCol){
+      rows=rows.map(r=>{
+        r[phoneCol]=String(r[phoneCol]||'').replace(/[\s().-]/g,'');
+        return r;
+      });
+    }
+
+    if(ops.has('emails')&&emailCol){
+      rows=rows.map(r=>{
+        r[emailCol]=String(r[emailCol]||'').trim().toLowerCase();
+        return r;
+      });
+    }
+
+    if(ops.has('sort')){
+      rows.sort((a,b)=>
+        String(a[nameCol||headers[0]]||'').localeCompare(
+          String(b[nameCol||headers[0]]||'')
+        )
+      );
+    }
+
+    const duplicateRows=[];
+
+    if(ops.has('duplicates')){
+      const seen=new Map();
+
+      rows.forEach((r,i)=>{
+        const key=headers
+          .map(h=>String(r[h]??'').trim().toLowerCase())
+          .join('\u001f');
+
+        if(seen.has(key)){
+          const firstIndex=seen.get(key);
+          const firstRow=rows[firstIndex];
+
+          if(!duplicateRows.some(d=>d._sourceRow===(firstRow._easyflowSourceRow||firstIndex+2))){
+            duplicateRows.push({
+              ...Object.fromEntries(headers.map(h=>[h,firstRow[h]])),
+              _sourceRow:firstRow._easyflowSourceRow||firstIndex+2,
+              ReviewStatus:'Possible duplicate — review before removal'
+            });
+          }
+
+          duplicateRows.push({
+            ...Object.fromEntries(headers.map(h=>[h,r[h]])),
+            _sourceRow:r._easyflowSourceRow||i+2,
+            ReviewStatus:'Possible duplicate — review before removal'
+          });
+
+          stats.duplicatesFound++;
+        }else{
+          seen.set(key,i);
+        }
+      });
+    }
+
+    const missing=[];
+
+    rows.forEach((r,i)=>{
+      const cols=headers.filter(h=>String(r[h]??'').trim()==='');
+      stats.missingCells+=cols.length;
+
+      if(cols.length){
+        missing.push({
+          sourceRow:r._easyflowSourceRow||i+2,
+          missingColumns:cols.join(', '),
+          ...Object.fromEntries(headers.map(h=>[h,r[h]]))
+        });
+      }
+    });
+
+    if(emailCol){
+      stats.invalidEmails+=rows.filter(r=>
+        r[emailCol]&&
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(r[emailCol]))
+      ).length;
+    }
+
+    output.push({
+      fileName:src.fileName,
+      sheetName:src.sheetName,
+      headers,
+      rows,
+      originalRows:src.originalRows,
+      duplicates:duplicateRows,
+      missing
+    });
+  }
+
+  stats.outputRows=output.reduce((n,s)=>n+s.rows.length,0);
+
+  return {output,stats};
+}
+
 function tableHtml(headers,rows,limit=40){return '<thead><tr>'+headers.map(h=>`<th>${esc(h)}</th>`).join('')+'</tr></thead><tbody>'+rows.slice(0,limit).map(r=>'<tr>'+headers.map(h=>`<td>${esc(r[h])}</td>`).join('')+'</tr>').join('')+'</tbody>'}
 function applySheetLayout(ws){
   const range=ws['!ref']?XLSX.utils.decode_range(ws['!ref']):{s:{c:0},e:{c:0}};
@@ -126,7 +269,7 @@ function runWork(){
     result=processSources();
     const totals=result.stats;
     $('resultsCard').classList.remove('hidden');
-    $('resultStats').innerHTML=[['Input rows',totals.inputRows],['Output rows',totals.outputRows],['Duplicates removed',totals.duplicatesRemoved],['Missing cells',totals.missingCells],['Invalid emails',totals.invalidEmails],['Files/sheets',`${totals.files}/${totals.sheets}`]].map(([k,v])=>`<div class="stat"><span class="small">${esc(k)}</span><b>${esc(v)}</b></div>`).join('');
+    $('resultStats').innerHTML=[['Input rows',totals.inputRows],['Output rows',totals.outputRows],['Possible duplicates found',totals.duplicatesFound],['Missing cells',totals.missingCells],['Invalid emails',totals.invalidEmails],['Files/sheets',`${totals.files}/${totals.sheets}`]].map(([k,v])=>`<div class="stat"><span class="small">${esc(k)}</span><b>${esc(v)}</b></div>`).join('');
     $('resultNotice').textContent=`Processing finished. ${totals.duplicatesRemoved} duplicate row(s) removed; ${totals.missingCells} missing cell(s) flagged; ${totals.invalidEmails} invalid email value(s) found. The workbook includes original data, cleaned data, quality checks, duplicate review, missing-value review, and a summary. Please review everything before delivery.`;
     $('resultNotice').className='notice '+((totals.duplicatesRemoved||totals.missingCells||totals.invalidEmails)?'warn':'ok');
     const first=result.output[0];
@@ -299,7 +442,7 @@ const report = [
   'Sheets processed: ' + totals.sheets,
   'Input rows: ' + totals.inputRows,
   'Output rows: ' + totals.outputRows,
-  'Duplicates removed: ' + totals.duplicatesRemoved,
+  'Possible duplicates flagged for review: ' + totals.duplicatesFound,
   'Missing cells found: ' + totals.missingCells,
   'Rows with missing values: ' +
     result.output.reduce(
