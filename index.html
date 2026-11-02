@@ -259,7 +259,7 @@ downloadCsv=function(){
  try{
   const dataHeaders=[...new Set(result.output.flatMap(sheet=>sheet.headers))],used=new Set(dataHeaders);let fileKey='SourceFile',sheetKey='SourceSheet';while(used.has(fileKey))fileKey='_'+fileKey;used.add(fileKey);while(used.has(sheetKey))sheetKey='_'+sheetKey;const headers=[fileKey,sheetKey,...dataHeaders];
   const rows=[headers];result.output.forEach(sheet=>sheet.rows.forEach(record=>rows.push([sheet.fileName,sheet.sheetName,...dataHeaders.map(h=>record[h]??'')])));
-  const csv='\\ufeff'+rows.map(row=>row.map(value=>{const safe=spreadsheetSafeValue(value),str=String(safe??'');return '"'+str.replace(/"/g,'""')+'"';}).join(',')).join('\\r\\n');
+  const csv='\ufeff'+rows.map(row=>row.map(value=>{const safe=spreadsheetSafeValue(value),str=String(safe??'');return '"'+str.replace(/"/g,'""')+'"';}).join(',')).join('\r\n');
   const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'})),a=document.createElement('a');a.href=url;a.download='EasyFlow_All_Cleaned_Data.csv';document.body.appendChild(a);a.click();a.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1500);
   setStatus('CSV export includes all processed files and sheets in one combined file.','ok');
  }catch(e){setStatus('Could not create the CSV download: '+e.message,'bad');}
