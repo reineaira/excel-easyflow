@@ -31,4 +31,7 @@ for (const [name, pattern] of required) {
 assert.doesNotMatch(html, /rows\s*=\s*rows\.filter\([^;]*(?:duplicate|Duplicate)/,
   'Duplicate processing must not automatically remove records.');
 
+
+assert.match(html, /const csv='\\ufeff'/, 'CSV export must include a real UTF-8 BOM escape.');
+assert.match(html, /join\\('\\\\r\\\\n'\\)/, 'CSV export must use CRLF line endings.');
 console.log('EasyFlow frontend checks passed.');
