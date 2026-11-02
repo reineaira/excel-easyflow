@@ -19,6 +19,7 @@ const required = [
   ['business income and expense tracker', /id="efdAddMoney"/],
   ['business net balance summary', /id="efdNetTotal"/],
   ['transactions included in local backup', /const keys=\['tasks','clients','products','orders','transactions'\]/],
+  ['older desk backup compatibility', /data\.transactions!==undefined/],
   ['device-only storage notice', /not synced to your EasyFlow account/i],
   ['backup restore control', /id="efdRestoreFile"/],
   ['formula-injection guard', /function spreadsheetSafeValue/],
