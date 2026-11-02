@@ -9,7 +9,7 @@ const scripts = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)]
 
 assert.equal(scripts.length, 1, 'Expected one inline application script.');
 for (const [index, source] of scripts.entries()) {
-  new vm.Script(source, { filename: \`index.html:inline-script-\${index + 1}\` });
+  new vm.Script(source, { filename: 'index.html:inline-script-' + (index + 1) });
 }
 
 const required = [
@@ -25,7 +25,7 @@ const required = [
   ['checkout endpoint', /\/api\/billing\/checkout/],
 ];
 for (const [name, pattern] of required) {
-  assert.match(html, pattern, \`Missing required feature: \${name}\`);
+  assert.match(html, pattern, 'Missing required feature: ' + name);
 }
 assert.doesNotMatch(html, /rows\s*=\s*rows\.filter\([^;]*(?:duplicate|Duplicate)/,
   'Duplicate processing must not automatically remove records.');
