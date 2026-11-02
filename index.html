@@ -75,7 +75,7 @@ const $=id=>document.getElementById(id);let sources=[],plan=null,result=null,wor
 const EF_TOKEN_KEY='easyflow_session_v4';
 function efStorageGet(){try{return localStorage.getItem(EF_TOKEN_KEY)||'';}catch(e){return '';}}
 function efStorageSet(value){try{localStorage.setItem(EF_TOKEN_KEY,value);}catch(e){}}
-function efStorageRemove(){try{efStorageRemove();}catch(e){}}
+function efStorageRemove(){try{localStorage.removeItem(EF_TOKEN_KEY);}catch(e){}}
 let efToken=efStorageGet();let efUser=null;
 function efAuthHeaders(extra={}){return {...extra,...(efToken?{Authorization:'Bearer '+efToken}:{})}}
 function efMessage(id,msg,kind='notice'){const el=$(id);if(!el)return;el.textContent=msg;el.className='notice authstatus '+(kind==='bad'?'bad':kind==='ok'?'ok':kind==='warn'?'warn':'');}
