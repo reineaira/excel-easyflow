@@ -23,6 +23,7 @@ const required = [
   ['authenticated API header', /Authorization:'Bearer '\+efToken/],
   ['registration endpoint', /\/api\/auth\/register/],
   ['checkout endpoint', /\/api\/billing\/checkout/],
+  ['PayMongo checkout URL compatibility', /r\.checkoutUrl\s*\|\|\s*r\.url/],
 ];
 for (const [name, pattern] of required) {
   assert.match(html, pattern, 'Missing required feature: ' + name);
