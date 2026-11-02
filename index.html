@@ -114,7 +114,7 @@ async function analyze(){if(!efToken){efShow('authBox');return setStatus('Please
 function findColumn(headers,pattern){return headers.find(h=>pattern.test(h))}
 function findNameColumns(headers){return headers.filter(h=>/^(name|full.?name|customer.?name|contact.?name|pangalan|first.?name|given.?name|last.?name|surname|family.?name)$/i.test(h.trim().replace(/\s+/g,''))) }
 function exportRows(headers,rows,safeForCsv=false){return rows.map(r=>Object.fromEntries(headers.map(h=>[h,safeForCsv?spreadsheetSafeValue(r[h]):String(r[h]??'')])))}
-function spreadsheetSafeValue(value){const s=String(value??'');return /^[\s]*[=+@\-]/.test(s)?"'"+s:s}
+function spreadsheetSafeValue(value){const s=String(value??''),trimmed=s.trim();const formula=/^[\s]*[=+@]/.test(s)||(/^[\s]*-/.test(s)&&!/^\-\d+(?:\.\d+)?$/.test(trimmed));return formula?"'"+s:s}
 function processSources(){
   if(!sources.length)throw new Error('Upload at least one Excel or CSV file first.');
   const ops=new Set((plan?.operations||[]).map(o=>o.key));
@@ -194,9 +194,9 @@ inferOps=function(task){
  if(/duplicate|duplicates|duplicat|double record/.test(t))add('duplicates','Detect and review duplicate records','Possible duplicates are flagged for human review; no records are deleted automatically.');
  if(/clean|cleanup|organize|standardize|standardise/.test(t))add('clean','Clean and organize data','The task requests cleaner or more consistent data.');
  if(/name|names|pangalan/.test(t))add('names','Standardize names','The task mentions names.');
- if(/phone|mobile|contact number|telephone/.test(t))add('phones','Standardize phone numbers','The task mentions phone or contact fields.');
+ if(/phone|mobile|telephone|contact[ -]?(?:number|no\.?|#)/.test(t))add('phones','Standardize phone numbers','The task mentions phone or contact-number fields.');
  if(/email|e-mail/.test(t))add('emails','Check email values','The task mentions email fields.');
- if(/sort|alphabet|arrange|order/.test(t))add('sort','Sort records','The task requests sorting or ordering.');
+ if(/\bsort\b|alphabet|arrange (?:the )?(?:rows|records|data)|order (?:the )?(?:rows|records|data) (?:by|alphabetically)/.test(t))add('sort','Sort records','The task requests sorting or ordering.');
  if(/missing|blank|empty|incomplete|kulang/.test(t))add('missing','Check missing values','The task mentions missing or incomplete information.');
  if(/summary|summarize|summarise|report|count/.test(t))add('summary','Create a summary','The task requests a summary or report.');
  if(/format|formatting|column width|header style/.test(t))add('format','Format the workbook','Apply consistent workbook layout and readable column widths.');
@@ -220,13 +220,14 @@ const easyFlowDeskMarkup=[
 '<h3>Product & inventory tracker</h3><div class="grid"><div class="field"><label for="efdProduct">Product</label><input id="efdProduct" maxlength="100"></div><div class="field"><label for="efdSku">SKU / code</label><input id="efdSku" maxlength="60" placeholder="Optional SKU"></div><div class="field"><label for="efdQty">Stock quantity</label><input id="efdQty" type="number" min="0" max="10000000" step="1"></div></div><div class="buttons"><button class="primary" id="efdAddProduct" type="button">Add / update product</button></div><div class="tablewrap"><table id="efdProducts"></table></div>',
 '<h3>Order tracker</h3><div class="grid"><div class="field"><label for="efdRef">Order reference</label><input id="efdRef" maxlength="80"></div><div class="field"><label for="efdCustomer">Customer</label><input id="efdCustomer" maxlength="100"></div><div class="field"><label for="efdOrderStatus">Order status</label><select id="efdOrderStatus"><option>New</option><option>Processing</option><option>Shipped</option><option>Delivered</option><option>Cancelled</option></select></div></div><div class="buttons"><button class="primary" id="efdAddOrder" type="button">Save order</button></div><div class="tablewrap"><table id="efdOrders"></table></div>',
 '<h3>Client email draft helper</h3><div class="field"><label for="efdTemplate">Template</label><select id="efdTemplate"><option value="update">Project update</option><option value="followup">Follow-up</option><option value="delivery">Work delivery</option><option value="thanks">Thank-you</option></select></div><div class="field"><label for="efdTo">Client name</label><input id="efdTo" maxlength="100"></div><div class="field"><label for="efdDetails">Details</label><textarea id="efdDetails" placeholder="Project details, deadline, or next steps"></textarea></div><div class="buttons"><button class="secondary" id="efdCreateEmail" type="button">Create email draft</button><button class="secondary" id="efdCopyEmail" type="button">Copy draft</button></div><div class="field"><label for="efdDraft">Email draft — review before sending</label><textarea id="efdDraft"></textarea></div>',
-'<div class="buttons"><button class="secondary" id="efdBackup" type="button">Export desk backup (JSON)</button><button class="danger" id="efdClear" type="button">Clear desk data on this device</button></div><div id="efdMessage" class="notice hidden" role="status"></div></section>'
+'<div class="buttons"><button class="secondary" id="efdBackup" type="button">Export desk backup (JSON)</button><label class="secondary" for="efdRestoreFile" style="display:inline-flex;align-items:center;cursor:pointer">Restore desk backup</label><input id="efdRestoreFile" type="file" accept=".json,application/json" hidden><button class="danger" id="efdClear" type="button">Clear desk data on this device</button></div><div id="efdMessage" class="notice hidden" role="status"></div></section>'
 ].join('');
 const deskAnchor=$('communityFeedback');
 if(deskAnchor&&!$('easyFlowFreelancerDesk'))deskAnchor.insertAdjacentHTML('beforebegin',easyFlowDeskMarkup);
 (function initEasyFlowDesk(){
  const KEY='easyflow_freelancer_desk_v1',blank={tasks:[],clients:[],products:[],orders:[]},cloneBlank=()=>JSON.parse(JSON.stringify(blank));
  let db;try{db=JSON.parse(localStorage.getItem(KEY)||'null')||cloneBlank();}catch(e){db=cloneBlank();}
+ if(!db||typeof db!=='object'||Array.isArray(db))db=cloneBlank();
  ['tasks','clients','products','orders'].forEach(k=>{if(!Array.isArray(db[k]))db[k]=[];});
  const d=id=>$(id),safe=s=>String(s??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
  const message=(s,kind='ok')=>{const n=d('efdMessage');n.textContent=s;n.className='notice '+kind;};
@@ -247,7 +248,8 @@ if(deskAnchor&&!$('easyFlowFreelancerDesk'))deskAnchor.insertAdjacentHTML('befor
  $('easyFlowFreelancerDesk').addEventListener('click',e=>{const v=e.target.dataset.efdDelete;if(v){const [kind,index]=v.split(':'),key={task:'tasks',client:'clients',product:'products',order:'orders'}[kind];if(key&&db[key][Number(index)]){db[key].splice(Number(index),1);save();message('Record deleted from this device.');}}});
  d('efdCreateEmail').onclick=()=>{const name=d('efdTo').value.trim()||'there',details=d('efdDetails').value.trim()||'[Add details here]',kind=d('efdTemplate').value;const drafts={update:'Hello '+name+',\n\nHere is a quick project update:\n'+details+'\n\nPlease let me know if you have any questions.\n\nBest regards,\nReine Aira',followup:'Hello '+name+',\n\nI am following up regarding:\n'+details+'\n\nPlease let me know when you have a chance. Thank you.\n\nBest regards,\nReine Aira',delivery:'Hello '+name+',\n\nI have completed the following work:\n'+details+'\n\nPlease review the attached files and let me know if any adjustments are needed.\n\nBest regards,\nReine Aira',thanks:'Hello '+name+',\n\nThank you for the opportunity to work with you.\n'+details+'\n\nI appreciate your time and look forward to working with you again.\n\nBest regards,\nReine Aira'};d('efdDraft').value=drafts[kind];};
  d('efdCopyEmail').onclick=async()=>{const v=d('efdDraft').value;if(!v)return message('Create a draft first.','warn');try{await navigator.clipboard.writeText(v);message('Email draft copied.');}catch(e){d('efdDraft').select();message('Select the text and copy it manually.','warn');}};
- d('efdBackup').onclick=()=>{try{const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='EasyFlow_Freelancer_Desk_Backup.json';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);message('Desk backup exported.');}catch(e){message('Could not export desk backup.','bad');}};
+ d('efdBackup').onclick=()=>{try{const blob=new Blob([JSON.stringify({format:'easyflow-freelancer-desk',version:1,exportedAt:new Date().toISOString(),data:db},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='EasyFlow_Freelancer_Desk_Backup.json';document.body.appendChild(a);a.click();a.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1500);message('Desk backup exported.');}catch(e){message('Could not export desk backup.','bad');}};
+ d('efdRestoreFile').addEventListener('change',async e=>{const file=e.target.files&&e.target.files[0];if(!file)return;try{if(file.size>2*1024*1024)throw new Error('Backup file is larger than 2 MB.');const parsed=JSON.parse(await file.text()),data=parsed?.format==='easyflow-freelancer-desk'?parsed.data:parsed;const keys=['tasks','clients','products','orders'];if(!data||typeof data!=='object'||Array.isArray(data)||!keys.every(k=>Array.isArray(data[k])))throw new Error('This is not a valid EasyFlow Desk backup.');if(keys.some(k=>data[k].length>5000))throw new Error('Backup contains too many records.');if(!confirm('Restore this backup and replace the current Freelancer Desk records on this device?'))return;db=Object.fromEntries(keys.map(k=>[k,data[k].filter(x=>x&&typeof x==='object'&&!Array.isArray(x))]));save();message('Backup restored on this device.');}catch(err){message(err.message||'Could not restore this backup.','bad');}finally{e.target.value='';}});
  d('efdClear').onclick=()=>{if(!confirm('Clear all tasks, clients, products, and orders saved on this device? This cannot be undone.'))return;db=cloneBlank();save();message('Local desk data cleared.');};
  render();
 })();
@@ -255,11 +257,10 @@ if(deskAnchor&&!$('easyFlowFreelancerDesk'))deskAnchor.insertAdjacentHTML('befor
 downloadCsv=function(){
  if(!result?.output?.length){setStatus('Run EasyFlow first to create the CSV output.','warn');return;}
  try{
-  const headers=['SourceFile','SourceSheet',...new Set(result.output.flatMap(s=>s.headers))],rows=[];
-  result.output.forEach(sheet=>sheet.rows.forEach(record=>{const row={SourceFile:sheet.fileName,SourceSheet:sheet.sheetName};sheet.headers.forEach(h=>row[h]=record[h]==null?'':record[h]);rows.push(row);}));
-  const safeRows=rows.map(row=>Object.fromEntries(headers.map(h=>[h,spreadsheetSafeValue(row[h])])));
-  const ws=XLSX.utils.json_to_sheet(safeRows,{header:headers}),csv='\ufeff'+XLSX.utils.sheet_to_csv(ws);
-  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'})),a=document.createElement('a');a.href=url;a.download='EasyFlow_All_Cleaned_Data.csv';document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+  const dataHeaders=[...new Set(result.output.flatMap(sheet=>sheet.headers))],used=new Set(dataHeaders);let fileKey='SourceFile',sheetKey='SourceSheet';while(used.has(fileKey))fileKey='_'+fileKey;used.add(fileKey);while(used.has(sheetKey))sheetKey='_'+sheetKey;const headers=[fileKey,sheetKey,...dataHeaders];
+  const rows=[headers];result.output.forEach(sheet=>sheet.rows.forEach(record=>rows.push([sheet.fileName,sheet.sheetName,...dataHeaders.map(h=>record[h]??'')])));
+  const csv='\\ufeff'+rows.map(row=>row.map(value=>{const safe=spreadsheetSafeValue(value),str=String(safe??'');return '"'+str.replace(/"/g,'""')+'"';}).join(',')).join('\\r\\n');
+  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'})),a=document.createElement('a');a.href=url;a.download='EasyFlow_All_Cleaned_Data.csv';document.body.appendChild(a);a.click();a.remove();window.setTimeout(()=>URL.revokeObjectURL(url),1500);
   setStatus('CSV export includes all processed files and sheets in one combined file.','ok');
  }catch(e){setStatus('Could not create the CSV download: '+e.message,'bad');}
 };
