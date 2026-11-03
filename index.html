@@ -293,9 +293,7 @@ if(deskAnchor&&!$('easyFlowFreelancerDesk'))deskAnchor.insertAdjacentHTML('befor
  };
  d('efdCloudSave').onclick=async()=>{
   try{
-   if(!Number.isInteger(cloudVersion)){
-    const current=await cloudRequest('GET');cloudVersion=Number(current.version||0);
-   }
+   const current=await cloudRequest('GET');cloudVersion=Number(current.version||0);
    if(!confirm('Save this device’s Freelancer Desk records to your signed-in account? This updates the cloud copy for this account.'))return;
    const saved=await cloudRequest('PUT',{version:cloudVersion,workspace:db});cloudVersion=Number(saved.version||cloudVersion);cloudMsg('Freelancer Desk records saved to your account.');
   }catch(e){cloudMsg(e.message||'Could not save account records.','bad');}
