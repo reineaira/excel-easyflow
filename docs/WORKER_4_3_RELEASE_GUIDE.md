@@ -14,31 +14,36 @@
 - Frontend now offers explicit Save to account, Merge account data, and Load account data actions. It never silently overwrites the local copy on login.
 - Device JSON export/import remains available.
 
-## Database migration required
+## Staging database migrations
 
-The new API requires `migrations/0001_ef_user_workspace_v1.sql` to be applied to the target Cloudflare D1 database before the new routes can work. The migration is checked into this branch only. It has NOT been run against any database.
+Apply these migrations in numerical order to the isolated `easyflow-staging-db` database only:
+
+1. `migrations/0000_ef_core_v4.sql` — creates the v4 users, sessions, and orders tables used by the existing Worker API.
+2. `migrations/0001_ef_user_workspace_v1.sql` — creates the account workspace snapshot table.
+
+Both files use `IF NOT EXISTS` for safe repeat execution. They have not been applied to any database. Do not apply them to production `my-binding` as part of staging setup.
 
 ## Required Cloudflare Worker bindings/secrets
 
-Keep the existing binding and secret names unchanged:
-- D1 binding: `DB`
-- Secret: `OPENAI_API_KEY`
-- Variable: `OPENAI_MODEL` (default `gpt-6-luna`; confirmed in the current OpenAI API model catalog)
-- Secret: `PAYMONGO_SECRET_KEY`
-- Secret: `PAYMONGO_WEBHOOK_SECRET`
+For the staging Worker, configure:
+- D1 binding: `DB` → `easyflow-staging-db`
+- Secret: `OPENAI_API_KEY` — use a separate test/development key if available.
+- Variable: `OPENAI_MODEL` — `gpt-6-luna` (or another model enabled for the configured key).
+- Secret: `PAYMONGO_SECRET_KEY` — PayMongo test-mode secret only.
+- Secret: `PAYMONGO_WEBHOOK_SECRET` — staging test webhook signing secret only.
 
-Never commit secret values to GitHub or the frontend.
+Never copy production secrets into GitHub or the frontend. If separate test credentials are not available, leave the corresponding integration unconfigured and test the remaining routes first.
 
 ## Release sequence — not performed
 
 1. Back up the live Worker source and D1 database.
 2. Verify the current live D1 table schema against the queries in `worker.js`.
-3. Apply the workspace migration to the intended D1 database.
-4. Deploy this Worker source to a separate staging Worker first, with the same binding names and securely configured test credentials.
+3. Apply `0000` then `0001` to `easyflow-staging-db` only.
+4. Deploy this Worker source to a separate staging Worker, with the staging D1 binding and staging-only test credentials.
 5. Test registration/login/logout, expired sessions, AI planning, trial/credits, PayMongo test checkout/webhook, per-account workspace isolation, invalid tokens, oversized requests, stale versions, and concurrent saves.
 6. Test the frontend on Android and desktop browsers, including Excel/CSV upload and downloads, local backup/restore, account merge/load/save, logout/login, and network failure behavior.
 7. Only after successful tests and explicit owner approval, schedule the production Worker/database/site release.
 
 ## Verification truth
 
-The source and frontend scripts have been syntax-reviewed. The workflow was changed to use the runner's built-in Git and Node.js rather than third-party setup actions, to reduce repository action-policy dependencies. A successful GitHub Actions run is still required; previous PR runs ended in `startup_failure` with zero jobs. Therefore no automated test suite has been confirmed passing. The live Worker, D1 database, PayMongo settings, secrets, and GitHub Pages site have not been changed by this branch.
+Source syntax and static safety checks have been reviewed. These migrations are prepared from the SQL statements currently used by `worker.js`; the staging database has not yet been queried to verify application. The live Worker, production D1 database, PayMongo settings, secrets, and GitHub Pages site have not been changed by this work.
