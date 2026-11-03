@@ -20,7 +20,7 @@ const required = [
   ['business net balance summary', /id="efdNetTotal"/],
   ['transactions included in local backup', /const keys=\['tasks','clients','products','orders','transactions'\]/],
   ['older desk backup compatibility', /data\.transactions!==undefined/],
-  ['device-only storage notice', /not synced to your EasyFlow account/i],
+  ['device-local storage notice', /device copy remains available/i],
   ['backup restore control', /id="efdRestoreFile"/],
   ['formula-injection guard', /function spreadsheetSafeValue/],
   ['combined CSV export', /EasyFlow_All_Cleaned_Data\.csv/],
@@ -28,6 +28,8 @@ const required = [
   ['registration endpoint', /\/api\/auth\/register/],
   ['checkout endpoint', /\/api\/billing\/checkout/],
   ['PayMongo checkout URL compatibility', /r\.checkoutUrl\s*\|\|\s*r\.url/],
+  ['account workspace sync', /\/api\/workspace/],
+  ['device-to-account sync controls', /id="efdCloudSave"/],
 ];
 for (const [name, pattern] of required) {
   assert.match(html, pattern, 'Missing required feature: ' + name);
