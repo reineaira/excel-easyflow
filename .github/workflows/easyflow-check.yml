@@ -24,3 +24,5 @@ jobs:
           node-version: 20
       - name: Check frontend syntax and safety invariants
         run: node scripts/check-frontend.cjs
+      - name: Check Worker syntax and workspace safety
+        run: node scripts/check-worker.cjs
