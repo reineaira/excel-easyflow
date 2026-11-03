@@ -221,7 +221,7 @@ const easyFlowDeskMarkup=[
 '<h3>Order tracker</h3><div class="grid"><div class="field"><label for="efdRef">Order reference</label><input id="efdRef" maxlength="80"></div><div class="field"><label for="efdCustomer">Customer</label><input id="efdCustomer" maxlength="100"></div><div class="field"><label for="efdOrderStatus">Order status</label><select id="efdOrderStatus"><option>New</option><option>Processing</option><option>Shipped</option><option>Delivered</option><option>Cancelled</option></select></div></div><div class="buttons"><button class="primary" id="efdAddOrder" type="button">Save order</button></div><div class="tablewrap"><table id="efdOrders"></table></div>',
 '<h3>Business records — income & expenses</h3><p class="hint">Track simple business transactions. Amounts and records stay on this device.</p><div class="grid"><div class="field"><label for="efdMoneyType">Type</label><select id="efdMoneyType"><option value="income">Income</option><option value="expense">Expense</option></select></div><div class="field"><label for="efdMoneyCategory">Category</label><input id="efdMoneyCategory" maxlength="80" placeholder="e.g. Client payment / Internet"></div><div class="field"><label for="efdMoneyAmount">Amount (PHP)</label><input id="efdMoneyAmount" type="number" min="0.01" max="100000000" step="0.01"></div><div class="field"><label for="efdMoneyDate">Date</label><input id="efdMoneyDate" type="date"></div></div><div class="field"><label for="efdMoneyNote">Note (optional)</label><input id="efdMoneyNote" maxlength="200" placeholder="Reference or short note"></div><div class="buttons"><button class="primary" id="efdAddMoney" type="button">Add business record</button></div><div class="grid"><div class="stat"><span class="small">Total income</span><b id="efdIncomeTotal">₱0.00</b></div><div class="stat"><span class="small">Total expenses</span><b id="efdExpenseTotal">₱0.00</b></div><div class="stat"><span class="small">Net balance</span><b id="efdNetTotal">₱0.00</b></div></div><div class="tablewrap"><table id="efdMoneyTable"></table></div>',
 '<h3>Client email draft helper</h3><div class="field"><label for="efdTemplate">Template</label><select id="efdTemplate"><option value="update">Project update</option><option value="followup">Follow-up</option><option value="delivery">Work delivery</option><option value="thanks">Thank-you</option></select></div><div class="field"><label for="efdTo">Client name</label><input id="efdTo" maxlength="100"></div><div class="field"><label for="efdDetails">Details</label><textarea id="efdDetails" placeholder="Project details, deadline, or next steps"></textarea></div><div class="buttons"><button class="secondary" id="efdCreateEmail" type="button">Create email draft</button><button class="secondary" id="efdCopyEmail" type="button">Copy draft</button></div><div class="field"><label for="efdDraft">Email draft — review before sending</label><textarea id="efdDraft"></textarea></div>',
-'<div class="buttons"><button class="secondary" id="efdBackup" type="button">Export desk backup (JSON)</button><label class="secondary" for="efdRestoreFile" style="display:inline-flex;align-items:center;cursor:pointer">Restore desk backup</label><input id="efdRestoreFile" type="file" accept=".json,application/json" hidden><button class="danger" id="efdClear" type="button">Clear desk data on this device</button></div><div id="efdMessage" class="notice hidden" role="status"></div></section>'
+'<div class="buttons"><button class="primary" id="efdCloudLoad" type="button">Load account backup</button><button class="primary" id="efdCloudSave" type="button">Save to account</button><button class="secondary" id="efdBackup" type="button">Export desk backup (JSON)</button><label class="secondary" for="efdRestoreFile" style="display:inline-flex;align-items:center;cursor:pointer">Restore desk backup</label><input id="efdRestoreFile" type="file" accept=".json,application/json" hidden><button class="danger" id="efdClear" type="button">Clear desk data on this device</button></div><p class="hint">Account sync requires sign-in. Cloud data is separate from this device until you choose Load or Save.</p><div id="efdCloudMessage" class="notice hidden" role="status"></div><div id="efdMessage" class="notice hidden" role="status"></div></section>'
 ].join('');
 const deskAnchor=$('communityFeedback');
 if(deskAnchor&&!$('easyFlowFreelancerDesk'))deskAnchor.insertAdjacentHTML('beforebegin',easyFlowDeskMarkup);
@@ -266,6 +266,42 @@ if(deskAnchor&&!$('easyFlowFreelancerDesk'))deskAnchor.insertAdjacentHTML('befor
  d('efdCloudLoad').onclick=async()=>{try{if(!cloudReady)await window.efDeskSync();if(!cloudReady)return;if(!confirm('Replace the Freelancer Desk data on this device with the account copy? Export a device backup first if you need it.'))return;db=JSON.parse(JSON.stringify(cloudSnapshot||cloneBlank()));save();cloudStatus('Account copy loaded to this device.','ok');}catch(e){cloudStatus(e.message,'bad');}};
  d('efdCloudMerge').onclick=async()=>{try{if(!cloudReady)await window.efDeskSync();if(!cloudReady)return;const merged={};WORKSPACE_KEYS.forEach(k=>{const seen=new Set();merged[k]=[...(db[k]||[]),...(cloudSnapshot?.[k]||[])].filter(item=>{const key=JSON.stringify(item);if(seen.has(key))return false;seen.add(key);return true;});});if(WORKSPACE_KEYS.some(k=>merged[k].length>2000))throw new Error('Merged data is too large. Export a backup and remove old records first.');await cloudSave(merged);db=merged;try{localStorage.setItem(KEY,JSON.stringify(db));render();}catch(e){throw new Error('Cloud copy saved, but local storage could not be updated. Download a backup and check device storage.');}message('Device and account records merged.');}catch(e){cloudStatus(e.message,'bad');}};
  render();
+ let cloudVersion=0;
+ const cloudMsg=(msg,kind='ok')=>{const n=d('efdCloudMessage');n.textContent=msg;n.className='notice '+kind;n.classList.remove('hidden');};
+ async function cloudRequest(method,body){
+  if(!efToken)throw new Error('Please sign in before using account sync.');
+  const response=await fetch(WORKER_URL+'/api/workspace',{method,headers:efAuthHeaders({'Content-Type':'application/json'}),...(body?{body:JSON.stringify(body)}:{})});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok){if(response.status===409&&Number.isInteger(data.version))cloudVersion=data.version;throw new Error(data.error||'Account sync failed.');}
+  return data;
+ }
+ d('efdCloudLoad').onclick=async()=>{
+  try{
+   const data=await cloudRequest('GET');
+   cloudVersion=Number(data.version||0);
+   const localCount=WORKSPACE_KEYS_LOCAL.reduce((n,k)=>n+db[k].length,0);
+   const cloudCount=Object.values(data.workspace||{}).reduce((n,a)=>n+(Array.isArray(a)?a.length:0),0);
+   if(cloudCount===0){
+    if(localCount===0){cloudMsg('Your account has no saved Freelancer Desk records yet.');return;}
+    if(!confirm('Your account cloud copy is empty. Save the records on this device to your account now?'))return;
+    const saved=await cloudRequest('PUT',{version:cloudVersion,workspace:db});cloudVersion=Number(saved.version||cloudVersion);cloudMsg('Your device records are now saved to your account.');return;
+   }
+   if(localCount>0&&!confirm('Loading will replace the current records on this device with the account copy. Export a JSON backup first if you need to keep both. Continue?'))return;
+   db=Object.fromEntries(WORKSPACE_KEYS_LOCAL.map(k=>[k,Array.isArray(data.workspace[k])?data.workspace[k]:[]]));
+   localStorage.setItem(KEY,JSON.stringify(db));render();cloudMsg('Account records loaded on this device.');
+  }catch(e){cloudMsg(e.message||'Could not load account records.','bad');}
+ };
+ d('efdCloudSave').onclick=async()=>{
+  try{
+   if(!Number.isInteger(cloudVersion)){
+    const current=await cloudRequest('GET');cloudVersion=Number(current.version||0);
+   }
+   if(!confirm('Save this device’s Freelancer Desk records to your signed-in account? This updates the cloud copy for this account.'))return;
+   const saved=await cloudRequest('PUT',{version:cloudVersion,workspace:db});cloudVersion=Number(saved.version||cloudVersion);cloudMsg('Freelancer Desk records saved to your account.');
+  }catch(e){cloudMsg(e.message||'Could not save account records.','bad');}
+ };
+ const WORKSPACE_KEYS_LOCAL=['tasks','clients','products','orders','transactions'];
+ d('efdCloudLoad').disabled=!efToken;d('efdCloudSave').disabled=!efToken;
 })();
 /* Export all processed files/sheets in one CSV, guarding against spreadsheet formulas. */
 downloadCsv=function(){
