@@ -42,23 +42,21 @@ assert.match(html, /const csv='\\ufeff'/, 'CSV export must include a real UTF-8 
 assert.ok(html.includes(String.raw`join('\r\n')`), 'CSV export must use CRLF line endings.');
 
 const worker = fs.readFileSync('worker.js', 'utf8');
-const workerForSyntax = worker.replace(/^export\\s+default\\s+/m, 'const easyFlowWorker = ');
-new vm.Script(workerForSyntax, { filename: 'worker.js' });
-const workerRequired = [
-  ['workspace CORS PUT support', /Access-Control-Allow-Methods":"GET, POST, PUT, OPTIONS/],
-  ['authenticated workspace GET route', /url\.pathname==="\\/api\\/workspace"&&request\.method==="GET"/],
-  ['authenticated workspace PUT route', /url\.pathname==="\\/api\\/workspace"&&request\.method==="PUT"/],
-  ['session-derived account identity', /WHERE user_id=\?"\)\.bind\(u\.id\)/],
-  ['optimistic workspace version check', /expected!==actual/],
-  ['workspace payload size limit', /WORKSPACE_MAX_BYTES=256\*1024/],
-  ['workspace record limit', /WORKSPACE_MAX_RECORDS=2000/],
-  ['plan-independent workspace access', /async function getWorkspace\(req,env,origin\)\{const u=await userFor/],
+new vm.Script(worker.replace('export default ', 'const easyFlowWorker = '), { filename: 'worker.js' });
+const workerAssertions = [
+  ['workspace CORS PUT support', worker.includes('"Access-Control-Allow-Methods":"GET, POST, PUT, OPTIONS"')],
+  ['authenticated workspace GET route', worker.includes('url.pathname==="/api/workspace"&&request.method==="GET"')],
+  ['authenticated workspace PUT route', worker.includes('url.pathname==="/api/workspace"&&request.method==="PUT"')],
+  ['session-derived account identity', worker.includes('WHERE user_id=?").bind(u.id)')],
+  ['optimistic workspace version check', worker.includes('expected!==actual')],
+  ['workspace payload size limit', worker.includes('WORKSPACE_MAX_BYTES=256*1024')],
+  ['workspace record limit', worker.includes('WORKSPACE_MAX_RECORDS=2000')],
+  ['plan-independent workspace access', worker.includes('async function getWorkspace(req,env,origin){const u=await userFor')],
 ];
-for (const [name, pattern] of workerRequired) {
-  assert.match(worker, pattern, 'Missing Worker requirement: ' + name);
+for (const [name, passed] of workerAssertions) {
+  assert.ok(passed, 'Missing Worker requirement: ' + name);
 }
 const migration = fs.readFileSync('migrations/0001_ef_user_workspace_v1.sql', 'utf8');
 assert.match(migration, /CREATE TABLE IF NOT EXISTS ef_user_workspace_v1/);
 assert.match(migration, /user_id TEXT PRIMARY KEY NOT NULL/);
-
 console.log('EasyFlow frontend and Worker checks passed.');
