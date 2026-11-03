@@ -15,13 +15,16 @@ permissions:
 jobs:
   frontend-check:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - name: Check out the triggering Git ref without third-party actions
+        run: |
+          git init .
+          git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          git fetch --depth=1 origin "${GITHUB_REF}"
+          git checkout --detach FETCH_HEAD
+      - name: Verify Node.js runtime
+        run: node --version
       - name: Check frontend syntax and safety invariants
         run: node scripts/check-frontend.cjs
       - name: Check Worker syntax and workspace safety
