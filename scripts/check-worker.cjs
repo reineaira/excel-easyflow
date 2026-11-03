@@ -23,7 +23,8 @@ const workerChecks = [
   'readBody(request,1048576)',
   '"Access-Control-Allow-Methods":"GET, POST, PUT, OPTIONS"',
   '"Access-Control-Allow-Headers":"Content-Type, Authorization"',
-  'Number(x.amount)===Number(order?.amount)'
+  'Number(x.net_amount??x.amount)===Number(order?.amount)',
+  'Number(write?.meta?.changes)!==1'
 ];
 for (const item of workerChecks) assert.ok(worker.includes(item), 'Missing Worker invariant: ' + item);
 for (const item of ['/api/workspace','efdCloudSave','efdCloudMerge','efdCloudLoad']) assert.ok(html.includes(item), 'Missing frontend sync feature: ' + item);
