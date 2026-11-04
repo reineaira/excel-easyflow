@@ -21,7 +21,7 @@ Apply these migrations in numerical order to the isolated `easyflow-staging-db` 
 1. `migrations/0000_ef_core_v4.sql` — creates the v4 users, sessions, and orders tables used by the existing Worker API.
 2. `migrations/0001_ef_user_workspace_v1.sql` — creates the account workspace snapshot table.
 
-Both files use `IF NOT EXISTS` for safe repeat execution. They have not been applied to any database. Do not apply them to production `my-binding` as part of staging setup.
+Both files use `IF NOT EXISTS` for safe repeat execution. The core migration relies on Cloudflare D1's default foreign-key enforcement and does not attempt to toggle `PRAGMA foreign_keys` inside a D1 transaction. They have not been applied to any database. Do not apply them to production `my-binding` as part of staging setup.
 
 ## Required Cloudflare Worker bindings/secrets
 
