@@ -73,6 +73,7 @@ assert.equal(result.output[1].duplicates.length, 0);
 assert.equal(result.output.reduce((n, sheet) => n + sheet.duplicates.length, 0), result.stats.duplicatesFound,
   'Per-sheet duplicate counts must add up to the overall count.');
 
+context.result = result;
 const csv = vm.runInNewContext('buildCombinedCsv(result)', context);
 assert.ok(csv.startsWith('\ufeff'), 'CSV must include a UTF-8 BOM.');
 assert.ok(csv.includes('\r\n'), 'CSV must use CRLF line endings.');
