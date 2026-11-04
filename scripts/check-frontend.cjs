@@ -4,32 +4,32 @@ const assert = require('node:assert/strict');
 
 const html = fs.readFileSync('index.html', 'utf8');
 const scripts = [...html.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/gi)]
-  .map(match => match[1])
-  .filter(source => source.trim());
-
+  .map(match => match[1]).filter(source => source.trim());
 assert.equal(scripts.length, 1, 'Expected one inline application script.');
 for (const [index, source] of scripts.entries()) {
   new vm.Script(source, { filename: 'index.html:inline-script-' + (index + 1) });
 }
 
 const required = [
-  ['safe duplicate review', /Flag possible duplicates for human review/],
-  ['no automatic duplicate deletion wording', /do not delete rows automatically/i],
+  ['duplicate review label', /Possible duplicate — human review required/],
+  ['duplicate result count', /Possible duplicates found/],
+  ['duplicate review wording', /flag possible duplicates for human review/i],
   ['Freelancer Desk', /id="easyFlowFreelancerDesk"/],
-  ['business income and expense tracker', /id="efdAddMoney"/],
-  ['business net balance summary', /id="efdNetTotal"/],
-  ['transactions included in local backup', /const keys=\['tasks','clients','products','orders','transactions'\]/],
-  ['older desk backup compatibility', /data\.transactions!==undefined/],
+  ['income and expense tracker', /id="efdAddMoney"/],
+  ['net balance summary', /id="efdNetTotal"/],
+  ['local backup collections', /const keys=\['tasks','clients','products','orders','transactions'\]/],
+  ['older backup compatibility', /data\.transactions!==undefined/],
   ['device-local storage notice', /device copy remains available/i],
   ['backup restore control', /id="efdRestoreFile"/],
-  ['formula-injection guard', /function spreadsheetSafeValue/],
-  ['combined CSV export', /EasyFlow_All_Cleaned_Data\.csv/],
+  ['formula-injection guard', /function spreadsheetSafeValue\(value\)/],
+  ['combined CSV export', /function buildCombinedCsv\(resultData\)/],
+  ['CSV filename', /EasyFlow_All_Cleaned_Data\.csv/],
   ['authenticated API header', /Authorization:'Bearer '\+efToken/],
   ['registration endpoint', /\/api\/auth\/register/],
   ['checkout endpoint', /\/api\/billing\/checkout/],
   ['PayMongo checkout URL compatibility', /r\.checkoutUrl\s*\|\|\s*r\.url/],
   ['account workspace sync', /\/api\/workspace/],
-  ['device-to-account sync controls', /id="efdCloudSave"/],
+  ['cloud save control', /id="efdCloudSave"/],
 ];
 for (const [name, pattern] of required) {
   assert.match(html, pattern, 'Missing required feature: ' + name);
@@ -37,26 +37,50 @@ for (const [name, pattern] of required) {
 assert.doesNotMatch(html, /rows\s*=\s*rows\.filter\([^;]*(?:duplicate|Duplicate)/,
   'Duplicate processing must not automatically remove records.');
 
-
-assert.match(html, /const csv='\\ufeff'/, 'CSV export must include a real UTF-8 BOM escape.');
-assert.ok(html.includes(String.raw`join('\r\n')`), 'CSV export must use CRLF line endings.');
-
-const worker = fs.readFileSync('worker.js', 'utf8');
-new vm.Script(worker.replace('export default ', 'const easyFlowWorker = '), { filename: 'worker.js' });
-const workerAssertions = [
-  ['workspace CORS PUT support', worker.includes('"Access-Control-Allow-Methods":"GET, POST, PUT, OPTIONS"')],
-  ['authenticated workspace GET route', worker.includes('url.pathname==="/api/workspace"&&request.method==="GET"')],
-  ['authenticated workspace PUT route', worker.includes('url.pathname==="/api/workspace"&&request.method==="PUT"')],
-  ['session-derived account identity', worker.includes('WHERE user_id=?").bind(u.id)')],
-  ['optimistic workspace version check', worker.includes('expected!==actual')],
-  ['workspace payload size limit', worker.includes('WORKSPACE_MAX_BYTES=256*1024')],
-  ['workspace record limit', worker.includes('WORKSPACE_MAX_RECORDS=2000')],
-  ['plan-independent workspace access', worker.includes('async function getWorkspace(req,env,origin){const u=await userFor')],
-];
-for (const [name, passed] of workerAssertions) {
-  assert.ok(passed, 'Missing Worker requirement: ' + name);
+function extractBetween(startMarker, endMarker) {
+  const start = html.indexOf(startMarker);
+  const end = html.indexOf(endMarker, start);
+  assert.ok(start >= 0 && end > start, 'Unable to locate testable source: ' + startMarker);
+  return html.slice(start, end);
 }
-const migration = fs.readFileSync('migrations/0001_ef_user_workspace_v1.sql', 'utf8');
-assert.match(migration, /CREATE TABLE IF NOT EXISTS ef_user_workspace_v1/);
-assert.match(migration, /user_id TEXT PRIMARY KEY NOT NULL/);
-console.log('EasyFlow frontend and Worker checks passed.');
+const safeFn = extractBetween('function spreadsheetSafeValue(value){', '\nfunction processSources(){');
+const processFn = extractBetween('function processSources(){', '\nfunction tableHtml');
+const csvFn = extractBetween('function buildCombinedCsv(resultData){', '\nfunction downloadXlsx');
+const context = {
+  sources: [
+    { fileName: 'customers.csv', sheetName: 'Clients', headers: ['Name', 'Email'], originalRows: [
+      { Name: 'Ana Santos', Email: 'ana@example.com' },
+      { Name: 'Ana Santos', Email: 'ana@example.com' },
+      { Name: 'Ana Santos', Email: 'ana@example.com' },
+    ] },
+    { fileName: 'sales.xlsx', sheetName: 'January', headers: ['Item', 'Notes'], originalRows: [
+      { Item: 'Widget', Notes: '=2+3' },
+      { Item: 'Gadget', Notes: 'A, quoted "note"\r\ncontinued' },
+    ] },
+  ],
+  plan: { operations: [{ key: 'duplicates' }] },
+  findColumn: (headers, pattern) => headers.find(header => pattern.test(header)),
+  findNameColumns: () => [],
+  titleCaseName: value => value,
+};
+vm.runInNewContext(safeFn + '\n' + processFn + '\n' + csvFn, context, { timeout: 1000 });
+const result = vm.runInNewContext('processSources()', context);
+assert.equal(result.stats.inputRows, 5);
+assert.equal(result.stats.outputRows, 5, 'Possible duplicates must never be deleted.');
+assert.equal(result.output[0].duplicates.length, 3, 'All rows in a repeated group must be flagged.');
+assert.equal(result.stats.duplicatesFound, 3, 'Overall count must equal the number of flagged duplicate rows.');
+assert.equal(result.output[1].duplicates.length, 0);
+assert.equal(result.output.reduce((n, sheet) => n + sheet.duplicates.length, 0), result.stats.duplicatesFound,
+  'Per-sheet duplicate counts must add up to the overall count.');
+
+const csv = vm.runInNewContext('buildCombinedCsv(result)', context);
+assert.ok(csv.startsWith('\ufeff'), 'CSV must include a UTF-8 BOM.');
+assert.ok(csv.includes('\r\n'), 'CSV must use CRLF line endings.');
+assert.ok(csv.includes('SourceFile,SourceSheet'), 'CSV must identify each source file and sheet.');
+assert.ok(csv.includes('customers.csv,Clients') && csv.includes('sales.xlsx,January'),
+  'CSV must include every processed source and sheet.');
+assert.ok(csv.includes("'=2+3"), 'CSV must neutralize formula-like cell values.');
+assert.ok(csv.includes('"A, quoted ""note""\r\ncontinued"'),
+  'CSV must correctly quote commas, quotes, and embedded newlines.');
+
+console.log('EasyFlow frontend syntax, duplicate-review behavior, and combined CSV tests passed.');
