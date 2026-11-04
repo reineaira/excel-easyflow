@@ -46,6 +46,10 @@ function extractBetween(startMarker, endMarker) {
 const safeFn = extractBetween('function spreadsheetSafeValue(value){', '\nfunction processSources(){');
 const processFn = extractBetween('function processSources(){', '\nfunction tableHtml');
 const csvFn = extractBetween('function buildCombinedCsv(resultData){', '\nfunction downloadXlsx');
+assert.match(html, /Value:sheet\.duplicates\.length/, 'Quality sheets must count flagged duplicate rows.');
+assert.match(html, /'Possible duplicates found':sheet\.duplicates\.length/, 'Summary sheets must count flagged duplicate rows.');
+assert.match(html, /stats\.duplicatesFound\+=duplicateRows\.length/, 'Overall duplicate count must use the same flagged-row metric.');
+assert.doesNotMatch(html, /duplicatesRemoved/, 'The app must not report duplicates as removed.');
 const context = {
   sources: [
     { fileName: 'customers.csv', sheetName: 'Clients', headers: ['Name', 'Email'], originalRows: [
