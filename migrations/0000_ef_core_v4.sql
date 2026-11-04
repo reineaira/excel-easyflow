@@ -1,7 +1,7 @@
 -- DEVELOPMENT ONLY: base schema required by worker.js v4.3.0-dev.
 -- Apply only to the isolated easyflow-staging-db database.
 -- This schema is based on the SQL statements used by worker.js.
-PRAGMA foreign_keys = ON;
+-- Cloudflare D1 enforces foreign keys by default; no PRAGMA toggle is needed.
 
 CREATE TABLE IF NOT EXISTS ef_users_v4 (
   id TEXT PRIMARY KEY NOT NULL,
