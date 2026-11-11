@@ -207,7 +207,8 @@
   <footer>Excel EasyFlow • Built for freelancers • Final review by the freelancer is recommended</footer>
 
   <script>
-    const WORKER_URL='https://easyflow-ai-brain.grettabaliw.workers.dev';
+    const WORKER_URL='https://easyflow-ai-brain-staging.grettabaliw.workers.dev';
+
     const $=id=>document.getElementById(id);
     let sources=[], plan=null, result=null, workbookOutput=null;
 
@@ -242,7 +243,17 @@
       efUser=user;
       if(user){
         $('accountTitle').textContent='Signed in: '+user.email;
-        $('accountSummary').textContent=(user.access==='trial'?'Free trial':user.access==='expired'?'Trial expired':user.access==='pro'?'Pro plan':'Plan active');
+        const accessLabel =
+  user.access === 'trial' ? 'Free trial' :
+  user.access === 'expired' ? 'Access expired' :
+  user.access === 'starter' ? 'Starter plan' :
+  user.access === 'pro' ? 'Pro plan' :
+  user.access === 'business' ? 'Business plan' :
+  'Plan active';
+
+$('accountSummary').textContent =
+  `${accessLabel} • ${user.creditsRemaining ?? 0} workflow credit(s) remaining`;
+
         $('showAuth').classList.add('hidden');
         $('showPlans').classList.add('hidden');
         $('logoutBtn').classList.remove('hidden');
@@ -271,7 +282,8 @@
       const password=$('authPassword').value;
       if(!email||!password){ efMessage('authMessage','Enter your email and password.','warn'); return; }
       try {
-        const action=kind==='signup'?'signup':'login';
+        const action=kind==='signup'?'register':'login';
+
         const r=await efApi('/api/auth/'+action,{method:'POST',body:JSON.stringify({email,password})});
         efToken=r.token||'';
         if(efToken){ localStorage.setItem(EF_TOKEN_KEY,efToken); }
