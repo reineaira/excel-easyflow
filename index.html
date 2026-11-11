@@ -435,9 +435,44 @@ $('accountSummary').textContent =
       try {
         setStatus('Reading files and building an action plan…','');
         sources=await readFiles(Array.from(files));
-        const rawPlan=localPlan(task);
-        const merged=mergePlan(task,rawPlan,'local');
-        renderPlan(merged);
+        let brainResponse;
+
+        try {
+          brainResponse = await efApi('/api/brain', {
+              method: 'POST',
+                  body: JSON.stringify({
+                        task,
+                              sources: sources.map(getSample)
+                                  })
+                                    });
+
+                                      const merged = mergePlan(
+                                          task,
+                                              brainResponse.plan,
+                                                  brainResponse.source || 'ai'
+                                                    );
+
+                                                      renderPlan(merged);
+
+                                                        if (brainResponse.account) {
+                                                            efRenderAccount({
+                                                                  ...(efUser || {}),
+                                                                        ...brainResponse.account
+                                                                            });
+                                                                              }
+
+                                                                              } catch (aiError) {
+                                                                                console.warn('AI planning failed. Using local fallback.', aiError);
+
+                                                                                  const merged = mergePlan(
+                                                                                      task,
+                                                                                          localPlan(task),
+                                                                                              'local fallback'
+                                                                                                );
+
+                                                                                                  renderPlan(merged);
+                                                                                                  }
+
         setStatus('Workflow ready. Review the plan, then run EasyFlow.','ok');
       } catch (e) {
         setStatus(e.message,'bad');
